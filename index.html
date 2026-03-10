@@ -5,10 +5,10 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>Rootlabs</title>
-  <meta content="" name="description">
+  <title>Rootlabs I.T. Services</title>
+  <meta name="description" content="Rootlabs I.T. Services — Handcrafted web apps built for Bacolod City and beyond.">
   <meta name="facebook-domain-verification" content="m43kmxfqah2gy0zu4f2hr1xd5izbyz" />
-  <meta content="" name="keywords">
+  <meta name="keywords" content="web development, web design, bacolod, rootlabs, IT services">
   
 
   <!-- Favicons -->
@@ -16,453 +16,571 @@
   <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
 
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Vendor CSS Files -->
-  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
-  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Poppins', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50:  '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              300: '#93c5fd',
+              400: '#60a5fa',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e3a8a',
+              900: '#1e3a8a',
+            },
+          },
+          animation: {
+            'fade-up': 'fadeUp 0.6s ease-out forwards',
+          },
+          keyframes: {
+            fadeUp: {
+              '0%': { opacity: '0', transform: 'translateY(24px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+          },
+        }
+      }
+    }
+  </script>
+
+  <!-- Bootstrap Icons -->
   <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
-  <link href="assets/vendor/remixicon/remixicon.css" rel="stylesheet">
-  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
 
-  <!-- Template Main CSS File -->
-  <link href="assets/css/style.css" rel="stylesheet">
+  <!-- AOS Animations -->
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
 
+  <style>
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; }
+
+    /* Smooth nav highlight */
+    .nav-link.active { color: #2563eb !important; }
+
+    /* Portfolio card hover */
+    .portfolio-card:hover .portfolio-overlay { opacity: 1; }
+    .portfolio-overlay { transition: opacity 0.3s ease; }
+
+    /* Mobile menu */
+    #mobile-menu {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.35s ease, opacity 0.25s ease;
+    }
+    #mobile-menu.is-open {
+      max-height: 600px;
+      opacity: 1;
+    }
+
+    /* Counter section gradient */
+    .stats-gradient {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+    }
+
+    /* Hero gradient */
+    .hero-gradient {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #2563eb 100%);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #2563eb; border-radius: 3px; }
+
+    /* Back to top */
+    #back-to-top { opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+    #back-to-top.show { opacity: 1; pointer-events: auto; }
+  </style>
 </head>
 
-<body>
+<body class="bg-white text-slate-800 antialiased">
 
-  <!-- ======= Header ======= -->
-  <header id="header" class="header fixed-top">
-    <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
+  <!-- ======= Header / Nav ======= -->
+  <header id="site-header" class="fixed top-0 left-0 right-0 z-[9999] bg-white border-b border-slate-100 transition-shadow duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 lg:h-20">
 
-      <a href="index.html" class="logo d-flex align-items-center">
-        <img src="assets/img/logo.png" alt="">
-        <span>Rootlabs I.T. Services</span>
-      </a>
+        <!-- Logo -->
+        <a href="index.html" class="flex items-center gap-2 group">
+          <img src="assets/img/logo.png" alt="Rootlabs logo" class="h-9 w-auto">
+          <span class="font-display font-700 text-slate-900 text-lg leading-tight hidden sm:block">
+            Rootlabs <span class="text-blue-600">I.T. Services</span>
+          </span>
+        </a>
 
-      <nav id="navbar" class="navbar">
-        <ul>
-          <li><a class="nav-link scrollto active" href="#hero">Home</a></li>
-          <li><a class="nav-link scrollto" href="#about">About</a></li>
-          <li><a class="nav-link scrollto" href="#services">Services</a></li>
-          <li><a class="nav-link scrollto" href="#contact">Contact</a></li>
-          <li><a class="getstarted scrollto" href="#about">Get Started</a></li>
-        </ul>
-        <i class="bi bi-list mobile-nav-toggle"></i>
-      </nav><!-- .navbar -->
+        <!-- Desktop Nav -->
+        <nav class="hidden lg:flex items-center gap-8">
+          <a href="#hero"     class="nav-link text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">Home</a>
+          <a href="#about"    class="nav-link text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">About</a>
+          <a href="#portfolio" class="nav-link text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">Portfolio</a>
+          <a href="#services" class="nav-link text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">Services</a>
+          <a href="#contact"  class="nav-link text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">Contact</a>
+          <a href="#contact"  class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-colors shadow-sm">
+            Get Started <i class="bi bi-arrow-right"></i>
+          </a>
+        </nav>
 
+        <!-- Mobile menu button -->
+        <button onclick="toggleMenu()" aria-label="Open menu" style="position:relative;z-index:10000;touch-action:manipulation;cursor:pointer;-webkit-tap-highlight-color:transparent;" class="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors">
+          <i id="menu-icon" class="bi bi-list text-2xl" style="pointer-events:none;"></i>
+        </button>
+
+      </div>
     </div>
-  </header><!-- End Header -->
+
+    <!-- Mobile Nav -->
+    <div id="mobile-menu" class="lg:hidden bg-white border-t border-slate-100">
+      <nav class="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-2">
+        <a href="#hero"      class="mobile-nav-link py-2.5 px-4 rounded-lg text-slate-700 font-medium hover:bg-blue-50 hover:text-blue-600 transition-colors">Home</a>
+        <a href="#about"     class="mobile-nav-link py-2.5 px-4 rounded-lg text-slate-700 font-medium hover:bg-blue-50 hover:text-blue-600 transition-colors">About</a>
+        <a href="#portfolio" class="mobile-nav-link py-2.5 px-4 rounded-lg text-slate-700 font-medium hover:bg-blue-50 hover:text-blue-600 transition-colors">Portfolio</a>
+        <a href="#services"  class="mobile-nav-link py-2.5 px-4 rounded-lg text-slate-700 font-medium hover:bg-blue-50 hover:text-blue-600 transition-colors">Services</a>
+        <a href="#contact"   class="mobile-nav-link py-2.5 px-4 rounded-lg text-slate-700 font-medium hover:bg-blue-50 hover:text-blue-600 transition-colors">Contact</a>
+        <a href="#contact"   class="mt-2 inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-3 rounded-full transition-colors">
+          Get Started <i class="bi bi-arrow-right"></i>
+        </a>
+      </nav>
+    </div>
+  </header>
+  <!-- End Header -->
 
   <!-- ======= Hero Section ======= -->
-  <section id="hero" class="hero d-flex align-items-center">
+  <section id="hero" class="hero-gradient min-h-screen flex items-center pt-16 lg:pt-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 w-full">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
 
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-6 d-flex flex-column justify-content-center">
-          <h1 data-aos="fade-up">Handcrafted Web Apps</h1>
-          <h2 data-aos="fade-up" data-aos-delay="400">We are team of talented web developers and designers based in Bacolod City creating web apps!</h2>
-          <div data-aos="fade-up" data-aos-delay="600">
-            <div class="text-center text-lg-start">
-              <a href="#about" class="btn-get-started scrollto d-inline-flex align-items-center justify-content-center align-self-center">
-                <span>Get Started</span>
-                <i class="bi bi-arrow-right"></i>
+        <!-- Hero Text -->
+        <div data-aos="fade-right" data-aos-duration="700">
+          <span class="inline-block bg-blue-500/20 text-blue-300 text-xs font-semibold tracking-widest uppercase px-3 py-1.5 rounded-full mb-6 border border-blue-400/30">
+            Based in Bacolod City 🇵🇭
+          </span>
+          <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6">
+            Handcrafted<br>
+            <span class="text-orange-400">Web Apps</span>
+          </h1>
+          <p class="text-slate-300 text-lg leading-relaxed mb-10 max-w-lg">
+            We are a team of talented web developers and designers creating custom web apps that address the root of each client's pain points.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4">
+            <a href="#about" class="inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-400 text-white font-semibold px-8 py-4 rounded-full transition-all shadow-lg shadow-orange-500/30 hover:shadow-orange-400/40 hover:-translate-y-0.5">
+              Get Started <i class="bi bi-arrow-right"></i>
+            </a>
+            <a href="#portfolio" class="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold px-8 py-4 rounded-full border border-white/20 transition-all">
+              View Our Work <i class="bi bi-eye"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Hero Image -->
+        <div data-aos="fade-left" data-aos-duration="700" data-aos-delay="200" class="flex justify-center">
+          <img src="assets/img/hero-img.png" alt="Web development illustration" class="w-full max-w-md lg:max-w-full drop-shadow-2xl">
+        </div>
+
+      </div>
+    </div>
+  </section>
+  <!-- End Hero -->
+
+  <main>
+
+    <!-- ======= About Section ======= -->
+    <section id="about" class="py-20 lg:py-28 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+
+          <!-- Image -->
+          <div data-aos="fade-right" data-aos-duration="700" class="order-2 lg:order-1 rounded-2xl overflow-hidden shadow-xl">
+            <img src="assets/img/about.jpg" alt="About Rootlabs" class="w-full h-full object-cover">
+          </div>
+
+          <!-- Content -->
+          <div data-aos="fade-left" data-aos-duration="700" data-aos-delay="150" class="order-1 lg:order-2">
+            <span class="inline-block text-blue-600 text-sm font-semibold tracking-widest uppercase mb-4">Who We Are</span>
+            <h2 class="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 leading-tight mb-6">
+              We <span class="text-blue-600">create</span> web apps
+            </h2>
+            <p class="text-slate-600 text-lg leading-relaxed mb-8">
+              We believe every web app needs to be custom-built or handcrafted to address the <strong class="text-slate-800">root</strong> of each client's pain points.
+            </p>
+            <div class="grid sm:grid-cols-2 gap-5">
+              <div class="flex items-start gap-3 p-4 rounded-xl bg-blue-50 border border-blue-100">
+                <div class="shrink-0 w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <i class="bi bi-code-slash text-white text-lg"></i>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-slate-900 text-sm">Custom-Built Solutions</h4>
+                  <p class="text-slate-500 text-sm mt-0.5">Tailored exactly to your business needs</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3 p-4 rounded-xl bg-orange-50 border border-orange-100">
+                <div class="shrink-0 w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
+                  <i class="bi bi-people text-white text-lg"></i>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-slate-900 text-sm">Local Expert Team</h4>
+                  <p class="text-slate-500 text-sm mt-0.5">Dedicated Bacolod City professionals</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+    <!-- End About Section -->
+
+    <!-- ======= Portfolio Section ======= -->
+    <section id="portfolio" class="py-20 lg:py-28 bg-slate-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <div class="text-center mb-16" data-aos="fade-up">
+          <span class="inline-block text-blue-600 text-sm font-semibold tracking-widest uppercase mb-3">Our Work</span>
+          <h2 class="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900">Portfolio</h2>
+        </div>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+
+          <!-- Project 1 -->
+          <div class="portfolio-card group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 bg-white" data-aos="fade-up" data-aos-delay="100">
+            <div class="aspect-video overflow-hidden">
+              <img src="img/portfolio/rockwell.png" alt="Rockwell Contact Tracing" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            </div>
+            <div class="portfolio-overlay absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-transparent opacity-0 flex flex-col justify-end p-6">
+              <h4 class="text-white font-display font-bold text-lg mb-2">Rockwell Contact Tracing</h4>
+              <p class="text-slate-300 text-sm leading-relaxed mb-3 line-clamp-3">Healthbadge.co is a contact tracing system using minimal technology.</p>
+              <a href="https://contacttracing.therockwellist.com" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-orange-400 hover:text-orange-300 text-sm font-semibold transition-colors">
+                Visit Site <i class="bi bi-arrow-up-right"></i>
               </a>
             </div>
+            <div class="p-5 border-t border-slate-100">
+              <h4 class="font-display font-bold text-slate-900 mb-1">Rockwell Contact Tracing</h4>
+              <p class="text-slate-500 text-sm">Contact tracing system for Rockwell malls • </p>
+            </div>
           </div>
-        </div>
-        <div class="col-lg-6 hero-img" data-aos="zoom-out" data-aos-delay="200">
-          <img src="assets/img/hero-img.png" class="img-fluid" alt="">
+
+          <!-- Project 2 -->
+          <div class="portfolio-card group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 bg-white" data-aos="fade-up" data-aos-delay="200">
+            <div class="aspect-video overflow-hidden">
+              <img src="img/portfolio/booq.png" alt="BooqBCD" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            </div>
+            <div class="portfolio-overlay absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-transparent opacity-0 flex flex-col justify-end p-6">
+              <h4 class="text-white font-display font-bold text-lg mb-2">BooqBCD</h4>
+              <p class="text-slate-300 text-sm leading-relaxed mb-3">Online platform connecting patients to healthcare providers for appointment scheduling anytime, anywhere.</p>
+            </div>
+            <div class="p-5 border-t border-slate-100">
+              <h4 class="font-display font-bold text-slate-900 mb-1">BooqBCD</h4>
+              <p class="text-slate-500 text-sm">Healthcare appointment platform for Bacolod City</p>
+            </div>
+          </div>
+
+          <!-- Project 3 -->
+          <div class="portfolio-card group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 bg-white" data-aos="fade-up" data-aos-delay="300">
+            <div class="aspect-video overflow-hidden">
+              <img src="img/portfolio/ceres.png" alt="Yanson Group" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            </div>
+            <div class="portfolio-overlay absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-transparent opacity-0 flex flex-col justify-end p-6">
+              <h4 class="text-white font-display font-bold text-lg mb-2">Yanson Group of Bus Companies</h4>
+              <p class="text-slate-300 text-sm leading-relaxed mb-3">Internal management system built for the Yanson Group of Bus Companies.</p>
+            </div>
+            <div class="p-5 border-t border-slate-100">
+              <h4 class="font-display font-bold text-slate-900 mb-1">Yanson Group of Bus Companies</h4>
+              <p class="text-slate-500 text-sm">Internal operations system</p>
+            </div>
+          </div>
+
+          <!-- Project 4 - Eventstruct -->
+          <div class="portfolio-card group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 bg-white" data-aos="fade-up" data-aos-delay="400">
+            <div class="aspect-video overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
+              <div class="text-center px-6">
+                <img src="img/portfolio/eventstruct.png" alt="Eventstruct" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                <span class="text-white font-display font-bold text-xl">Eventstruct</span>
+              </div>
+            </div>
+            <div class="portfolio-overlay absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-transparent opacity-0 flex flex-col justify-end p-6">
+              <h4 class="text-white font-display font-bold text-lg mb-2">Eventstruct</h4>
+              <p class="text-slate-300 text-sm leading-relaxed mb-3">Event Management for Modern Teams — a streamlined platform to plan, organize, and run events efficiently.</p>
+            </div>
+            <div class="p-5 border-t border-slate-100">
+              <h4 class="font-display font-bold text-slate-900 mb-1">Eventstruct</h4>
+              <p class="text-slate-500 text-sm">Event Management for Modern Teams</p>
+            </div>
+          </div>
+
+          <!-- Project 5 - HOAnderful -->
+          <div class="portfolio-card group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 bg-white" data-aos="fade-up" data-aos-delay="500">
+            <div class="aspect-video overflow-hidden bg-gradient-to-br from-blue-900 to-blue-700 flex items-center justify-center">
+              <div class="text-center px-6">
+                <img src="img/portfolio/hoanderful.png" alt="HOAnderful" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                <span class="text-white font-display font-bold text-xl">HOAnderful</span>
+              </div>
+            </div>
+            <div class="portfolio-overlay absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-transparent opacity-0 flex flex-col justify-end p-6">
+              <h4 class="text-white font-display font-bold text-lg mb-2">HOAnderful</h4>
+              <p class="text-slate-300 text-sm leading-relaxed mb-3">Modern HOA Management Made Simple &amp; Powerful — everything a homeowners association needs in one place.</p>
+            </div>
+            <div class="p-5 border-t border-slate-100">
+              <h4 class="font-display font-bold text-slate-900 mb-1">HOAnderful</h4>
+              <p class="text-slate-500 text-sm">Modern HOA Management Made Simple &amp; Powerful</p>
+            </div>
+          </div>
+
+          <!-- Project 6 (CTA) -->
+          <div class="portfolio-card group rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 bg-gradient-to-br from-blue-600 to-blue-800 flex flex-col items-center justify-center p-10 text-center" data-aos="fade-up" data-aos-delay="600">
+            <div class="w-16 h-16 bg-white/15 rounded-full flex items-center justify-center mb-6">
+              <i class="bi bi-plus-lg text-white text-3xl"></i>
+            </div>
+            <h4 class="font-display font-bold text-white text-2xl mb-3">Your Project</h4>
+            <p class="text-blue-200 mb-8 max-w-xs">Let's collaborate and build something amazing together.</p>
+            <a href="#contact" class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-400 text-white font-semibold px-6 py-3 rounded-full transition-all hover:-translate-y-0.5 shadow-lg shadow-orange-500/30">
+              Contact Us <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+
         </div>
       </div>
-    </div>
-
-  </section><!-- End Hero -->
-
-  <main id="main">
-    <!-- ======= About Section ======= -->
-    <section id="about" class="about">
-
-      <div class="container" data-aos="fade-up">
-        <div class="row gx-0">
-
-          <div class="col-lg-6 d-flex flex-column justify-content-center" data-aos="fade-up" data-aos-delay="200">
-            <div class="content">
-              <h3>Who We Are</h3>
-              <h2>We create web apps</h2>
-              <p>
-                We believe every web app needs to be custom-built or handcrafted to address the root of each client's pain points. 
-              </p>
-            </div>
-          </div>
-
-          <div class="col-lg-6 d-flex align-items-center" data-aos="zoom-out" data-aos-delay="200">
-            <img src="assets/img/about.jpg" class="img-fluid" alt="">
-          </div>
-
-        </div>
-      </div>
-
-    </section><!-- End About Section -->
-
-    <!-- ======= Values Section ======= -->
-    <!--<section id="values" class="values">
-
-      <div class="container" data-aos="fade-up">
-
-        <header class="section-header">
-          <h2>Our Values</h2>
-          <p>Odit est perspiciatis laborum et dicta</p>
-        </header>
-
-        <div class="row">
-
-          <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
-            <div class="box">
-              <img src="assets/img/values-1.png" class="img-fluid" alt="">
-              <h3>Ad cupiditate sed est odio</h3>
-              <p>Eum ad dolor et. Autem aut fugiat debitis voluptatem consequuntur sit. Et veritatis id.</p>
-            </div>
-          </div>
-
-          <div class="col-lg-4 mt-4 mt-lg-0" data-aos="fade-up" data-aos-delay="400">
-            <div class="box">
-              <img src="assets/img/values-2.png" class="img-fluid" alt="">
-              <h3>Voluptatem voluptatum alias</h3>
-              <p>Repudiandae amet nihil natus in distinctio suscipit id. Doloremque ducimus ea sit non.</p>
-            </div>
-          </div>
-
-          <div class="col-lg-4 mt-4 mt-lg-0" data-aos="fade-up" data-aos-delay="600">
-            <div class="box">
-              <img src="assets/img/values-3.png" class="img-fluid" alt="">
-              <h3>Fugit cupiditate alias nobis.</h3>
-              <p>Quam rem vitae est autem molestias explicabo debitis sint. Vero aliquid quidem commodi.</p>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-
-    </section>--><!-- End Values Section -->
-
-    <!-- ======= Counts Section ======= -->
-    <section id="counts" class="counts">
-      <div class="container" data-aos="fade-up">
-
-        <div class="row gy-4">
-
-          <div class="col-lg-4 col-md-6">
-            <div class="count-box">
-              <i class="bi bi-journal-richtext" style="color: #ee6c20;"></i>
-              <div>
-                <span data-purecounter-start="0" data-purecounter-end="5" data-purecounter-duration="1" class="purecounter"></span>
-                <p>Projects</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-lg-4 col-md-6">
-            <div class="count-box">
-              <i class="bi bi-headset" style="color: #15be56;"></i>
-              <div>
-                <span data-purecounter-start="0" data-purecounter-end="11687" data-purecounter-duration="1" class="purecounter"></span>
-                <p>Hours Of Support</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-lg-4 col-md-6">
-            <div class="count-box">
-              <i class="bi bi-people" style="color: #bb0852;"></i>
-              <div>
-                <span data-purecounter-start="0" data-purecounter-end="5" data-purecounter-duration="1" class="purecounter"></span>
-                <p>Hard Workers</p>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-    </section><!-- End Counts Section -->
-<!-- ======= Portfolio Section ======= -->
-    <section id="portfolio" class="portfolio">
-
-      <div class="container" data-aos="fade-up">
-
-        <header class="section-header">
-          <p>Portfolio</p>
-        </header>
-
-        <!-- <div class="row" data-aos="fade-up" data-aos-delay="100">
-          <div class="col-lg-12 d-flex justify-content-center">
-            <ul id="portfolio-flters">
-              <li data-filter="*" class="filter-active">All</li>
-              <li data-filter=".filter-app">App</li>
-              <li data-filter=".filter-card">Card</li>
-              <li data-filter=".filter-web">Web</li>
-            </ul>
-          </div>
-        </div> -->
-
-        <div class="row gy-4 portfolio-container" data-aos="fade-up" data-aos-delay="200">
-
-          <div class="col-lg-6 col-md-6 portfolio-item filter-app">
-            <div class="portfolio-wrap">
-              <img src="img/portfolio/rockwell.png" class="img-fluid" alt="">
-              <div class="portfolio-info">
-                <h4>Rockwell Contact Tracing</h4>
-                <p>Healthbadge.co is a contact tracing system that uses minimal technology, making it available to people without smartphones or internet. Hospitals tag COVID-positives, government can contact trace, and establishments can be notified to sanitize if a COVID-positive visited. Currently used by all establishments on all Rockwell malls. <a href="https://therockwellist.com/healthbadge/">More Info</a> </p>
-                <div class="portfolio-links">
-                  <!-- <a href="assets/img/portfolio/portfolio-1.jpg" data-gallery="portfolioGallery" class="portfokio-lightbox" title="App 1"><i class="bi bi-plus"></i></a> -->
-                  <a href="https://contacttracing.therockwellist.com" title="More Details"><i class="bi bi-link"></i></a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-lg-6 col-md-6 portfolio-item filter-web">
-            <div class="portfolio-wrap">
-              <img src="img/portfolio/booq.png" class="img-fluid" alt="">
-              <div class="portfolio-info">
-                <h4>BooqBCD</h4>
-                <p>BOOQ is an online platform that connects patients to the various healthcare providers. You can set an appointment to your preferred Doctors, Nurses, Physical Therapists and Dentists anytime, anywhere!</p>
-                <div class="portfolio-links">
-                  <!-- <a href="assets/img/portfolio/portfolio-2.jpg" data-gallery="portfolioGallery" class="portfokio-lightbox" title="Web 3"><i class="bi bi-plus"></i></a>
-                  <a href="portfolio-details.html" title="More Details"><i class="bi bi-link"></i></a> -->
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-lg-6 col-md-6 portfolio-item filter-app">
-            <div class="portfolio-wrap">
-              <img src="img/portfolio/ceres.png" class="img-fluid" alt="">
-              <div class="portfolio-info">
-                <h4>Yanson Group of Bus Companies</h4>
-                <p>We have developed an internal system for the Yanson Group of Bus Companies.</p>
-                <div class="portfolio-links">
-                  
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-lg-6 col-md-6 portfolio-item filter-card">
-            <div class="portfolio-wrap">
-              <img src="img/portfolio/you.png" class="img-fluid" alt="">
-              <div class="portfolio-info">
-                <h4>Us</h4>
-                <p>Let's collaborate. :) Contact us.</p>
-                <div class="portfolio-links">
-                  
-                </div>
-              </div>
-            </div>
-          </div>
-
-          
-
-        </div>
-
-      </div>
-
-    </section><!-- End Portfolio Section -->
-    </section><!-- End Features Section -->
+    </section>
+    <!-- End Portfolio Section -->
 
     <!-- ======= Services Section ======= -->
-    <section id="services" class="services">
+    <section id="services" class="py-20 lg:py-28 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-      <div class="container" data-aos="fade-up">
+        <div class="text-center mb-16" data-aos="fade-up">
+          <span class="inline-block text-blue-600 text-sm font-semibold tracking-widest uppercase mb-3">What We Do</span>
+          <h2 class="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 mb-4">Services</h2>
+          <p class="text-slate-500 text-lg max-w-lg mx-auto">Aside from Web Apps, we offer a range of I.T. services:</p>
+        </div>
 
-        <header class="section-header">
-          <h2>Services</h2>
-          <p>Aside from Web Apps, we offer:</p>
-        </header>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-        <div class="row gy-5">
-
-          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-            <div class="service-box blue">
-              <i class="ri-discuss-line icon"></i>
-              <h3>Consultation</h3>
+          <div data-aos="fade-up" data-aos-delay="100" class="group p-7 rounded-2xl border border-slate-100 hover:border-blue-200 bg-white hover:bg-blue-50 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-center">
+            <div class="inline-flex items-center justify-center w-14 h-14 bg-blue-100 group-hover:bg-blue-600 rounded-xl mb-5 mx-auto transition-colors duration-300">
+              <i class="bi bi-chat-dots text-blue-600 group-hover:text-white text-2xl transition-colors duration-300"></i>
             </div>
+            <h3 class="font-display font-bold text-slate-900 text-lg">Consultation</h3>
+            <p class="text-slate-500 text-sm mt-2">Expert I.T. guidance to solve your business challenges</p>
           </div>
 
-          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-            <div class="service-box orange">
-              <i class="ri-discuss-line icon"></i>
-              <h3>Web Design</h3>
+          <div data-aos="fade-up" data-aos-delay="200" class="group p-7 rounded-2xl border border-slate-100 hover:border-orange-200 bg-white hover:bg-orange-50 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-center">
+            <div class="inline-flex items-center justify-center w-14 h-14 bg-orange-100 group-hover:bg-orange-500 rounded-xl mb-5 mx-auto transition-colors duration-300">
+              <i class="bi bi-palette text-orange-500 group-hover:text-white text-2xl transition-colors duration-300"></i>
             </div>
+            <h3 class="font-display font-bold text-slate-900 text-lg">Web Design</h3>
+            <p class="text-slate-500 text-sm mt-2">Beautiful, modern interfaces that engage your users</p>
           </div>
 
-          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
-            <div class="service-box green">
-              <i class="ri-discuss-line icon"></i>
-              <h3>Web Development</h3>
+          <div data-aos="fade-up" data-aos-delay="300" class="group p-7 rounded-2xl border border-slate-100 hover:border-green-200 bg-white hover:bg-green-50 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-center">
+            <div class="inline-flex items-center justify-center w-14 h-14 bg-green-100 group-hover:bg-green-600 rounded-xl mb-5 mx-auto transition-colors duration-300">
+              <i class="bi bi-code-square text-green-600 group-hover:text-white text-2xl transition-colors duration-300"></i>
             </div>
+            <h3 class="font-display font-bold text-slate-900 text-lg">Web Development</h3>
+            <p class="text-slate-500 text-sm mt-2">Robust, scalable web applications built from scratch</p>
           </div>
 
-          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400" id="trainings">
-            <div class="service-box green">
-              <i class="ri-discuss-line icon"></i>
-              <h3>Trainings</h3>
-              <img src="img/excel.png" width="350px"/>
+          <div data-aos="fade-up" data-aos-delay="400" id="trainings" class="group p-7 rounded-2xl border border-slate-100 hover:border-sky-200 bg-white hover:bg-sky-50 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-center">
+            <div class="inline-flex items-center justify-center w-14 h-14 bg-sky-100 group-hover:bg-sky-600 rounded-xl mb-5 mx-auto transition-colors duration-300">
+              <i class="bi bi-mortarboard text-sky-600 group-hover:text-white text-2xl transition-colors duration-300"></i>
             </div>
-            
+            <h3 class="font-display font-bold text-slate-900 text-lg">Trainings</h3>
+            <p class="text-slate-500 text-sm mt-2">Professional I.T. and productivity training programs</p>
           </div>
 
         </div>
-
       </div>
-
-    </section><!-- End Services Section -->
-
-   
-
-    
+    </section>
+    <!-- End Services Section -->
 
     <!-- ======= Contact Section ======= -->
-    <section id="contact" class="contact">
+    <section id="contact" class="py-20 lg:py-28 bg-slate-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-      <div class="container" data-aos="fade-up">
+        <div class="text-center mb-16" data-aos="fade-up">
+          <span class="inline-block text-blue-600 text-sm font-semibold tracking-widest uppercase mb-3">Let's Talk</span>
+          <h2 class="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 mb-4">Contact Us</h2>
+          <p class="text-slate-500 text-lg max-w-md mx-auto">Have a project in mind? We'd love to hear from you.</p>
+        </div>
 
-        <header class="section-header">
-          <h2>Contact</h2>
-          <p>Contact Us</p>
-        </header>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-        <div class="row gy-4">
-
-          <div class="col-lg-12">
-
-            <div class="row gy-4">
-              <div class="col-md-6">
-                <div class="info-box">
-                  <i class="bi bi-geo-alt"></i>
-                  <h3>Address</h3>
-              Kima's Square, G.M. Cordova St., Mandalagan,
-              Bacolod City, Negros Occidental<br>
-              Philippines <br><br></p>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="info-box">
-                  <i class="bi bi-telephone"></i>
-                  <h3>Call Us</h3>
-                  <p>+639155416177</p>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="info-box">
-                  <i class="bi bi-envelope"></i>
-                  <h3>Email Us</h3>
-                  <p>admin@rootlabs.dev</p>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="info-box">
-                  <i class="bi bi-clock"></i>
-                  <h3>Open Hours</h3>
-                  <p>Monday - Friday<br>9:00AM - 05:00PM</p>
-                </div>
-              </div>
+          <div data-aos="fade-up" data-aos-delay="100" class="bg-white rounded-2xl p-7 border border-slate-100 shadow-sm text-center group hover:border-blue-200 hover:shadow-md transition-all">
+            <div class="inline-flex items-center justify-center w-12 h-12 bg-blue-100 rounded-xl mb-4 mx-auto">
+              <i class="bi bi-geo-alt text-blue-600 text-xl"></i>
             </div>
-
+            <h3 class="font-display font-bold text-slate-900 mb-2">Address</h3>
+            <p class="text-slate-500 text-sm leading-relaxed">Kima's Square, G.M. Cordova St., Mandalagan,<br>Bacolod City, Negros Occidental<br>Philippines</p>
           </div>
 
-          
+          <div data-aos="fade-up" data-aos-delay="200" class="bg-white rounded-2xl p-7 border border-slate-100 shadow-sm text-center group hover:border-blue-200 hover:shadow-md transition-all">
+            <div class="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-xl mb-4 mx-auto">
+              <i class="bi bi-telephone text-green-600 text-xl"></i>
+            </div>
+            <h3 class="font-display font-bold text-slate-900 mb-2">Call Us</h3>
+            <a href="tel:+639913394705" class="text-slate-500 text-sm hover:text-blue-600 transition-colors">+63 991 339 4705</a>
+          </div>
+
+          <div data-aos="fade-up" data-aos-delay="300" class="bg-white rounded-2xl p-7 border border-slate-100 shadow-sm text-center group hover:border-blue-200 hover:shadow-md transition-all">
+            <div class="inline-flex items-center justify-center w-12 h-12 bg-orange-100 rounded-xl mb-4 mx-auto">
+              <i class="bi bi-envelope text-orange-500 text-xl"></i>
+            </div>
+            <h3 class="font-display font-bold text-slate-900 mb-2">Email Us</h3>
+            <a href="mailto:admin@rootlabs.dev" class="text-slate-500 text-sm hover:text-blue-600 transition-colors">admin@rootlabs.dev</a>
+          </div>
+
+          <div data-aos="fade-up" data-aos-delay="400" class="bg-white rounded-2xl p-7 border border-slate-100 shadow-sm text-center group hover:border-blue-200 hover:shadow-md transition-all">
+            <div class="inline-flex items-center justify-center w-12 h-12 bg-sky-100 rounded-xl mb-4 mx-auto">
+              <i class="bi bi-clock text-sky-600 text-xl"></i>
+            </div>
+            <h3 class="font-display font-bold text-slate-900 mb-2">Open Hours</h3>
+            <p class="text-slate-500 text-sm">Monday – Friday<br>9:00 AM – 5:00 PM</p>
+          </div>
 
         </div>
 
+        <!-- CTA Banner -->
+        <div class="mt-12 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-800 p-10 text-center" data-aos="fade-up" data-aos-delay="500">
+          <h3 class="font-display font-bold text-white text-2xl lg:text-3xl mb-3">Ready to build something great?</h3>
+          <p class="text-blue-200 mb-7 max-w-md mx-auto">Reach out and let's discuss how we can bring your idea to life.</p>
+          <a href="mailto:admin@rootlabs.dev" class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-400 text-white font-semibold px-8 py-4 rounded-full transition-all hover:-translate-y-0.5 shadow-lg shadow-orange-500/30">
+            Send Us a Message <i class="bi bi-envelope"></i>
+          </a>
+        </div>
+
       </div>
+    </section>
+    <!-- End Contact Section -->
 
-    </section><!-- End Contact Section -->
-
-  </main><!-- End #main -->
+  </main>
 
   <!-- ======= Footer ======= -->
-  <footer id="footer" class="footer">
+  <footer id="footer" class="bg-slate-900 text-slate-400">
 
-    <!-- <div class="footer-newsletter">
-      <div class="container">
-        <div class="row justify-content-center">
-          <div class="col-lg-12 text-center">
-            <h4>Our Newsletter</h4>
-            <p>Tamen quem nulla quae legam multos aute sint culpa legam noster magna</p>
-          </div>
-          <div class="col-lg-6">
-            <form action="" method="post">
-              <input type="email" name="email"><input type="submit" value="Subscribe">
-            </form>
-          </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
+
+        <!-- Brand -->
+        <div class="lg:col-span-1">
+          <a href="index.html" class="flex items-center gap-2 mb-4">
+            <img src="assets/img/logo.png" alt="Rootlabs" class="h-9 w-auto brightness-[2] opacity-90">
+            <span class="font-display font-bold text-white text-lg">Rootlabs <span class="text-blue-400">I.T. Services</span></span>
+          </a>
+          <p class="text-sm leading-relaxed">Handcrafting web apps for businesses in Bacolod City and beyond.</p>
         </div>
-      </div>
-    </div> -->
 
-    <div class="footer-top">
-      <div class="container">
-        <div class="row gy-4">
-          <div class="col-lg-4 col-6 footer-links">
-            <h4>Useful Links</h4>
-            <ul>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">Home</a></li>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">About us</a></li>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">Services</a></li>
-            </ul>
-          </div>
-
-          <div class="col-lg-4 col-6 footer-links">
-            <h4>Our Services</h4>
-            <ul>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">Web Design</a></li>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">Web Development</a></li>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">Product Management</a></li>
-            </ul>
-          </div>
-
-          <div class="col-lg-4 col-md-12 footer-contact text-center text-md-start">
-            <h4>Contact Us</h4>
-            <p>
-              Kima's Square, G.M. Cordova St., Mandalagan<br>
-              Bacolod City, Negros Occidental<br>
-              Philippines <br><br>
-              <strong>Phone:</strong> +639155416177<br>
-              <strong>Email:</strong> admin@rootlabs.dev<br>
-            </p>
-
-          </div>
-
+        <!-- Useful Links -->
+        <div>
+          <h4 class="text-white font-semibold mb-5">Useful Links</h4>
+          <ul class="space-y-2.5 text-sm">
+            <li><a href="#hero"      class="hover:text-blue-400 transition-colors flex items-center gap-2"><i class="bi bi-chevron-right text-xs"></i>Home</a></li>
+            <li><a href="#about"     class="hover:text-blue-400 transition-colors flex items-center gap-2"><i class="bi bi-chevron-right text-xs"></i>About Us</a></li>
+            <li><a href="#portfolio" class="hover:text-blue-400 transition-colors flex items-center gap-2"><i class="bi bi-chevron-right text-xs"></i>Portfolio</a></li>
+            <li><a href="#services"  class="hover:text-blue-400 transition-colors flex items-center gap-2"><i class="bi bi-chevron-right text-xs"></i>Services</a></li>
+            <li><a href="#contact"   class="hover:text-blue-400 transition-colors flex items-center gap-2"><i class="bi bi-chevron-right text-xs"></i>Contact</a></li>
+          </ul>
         </div>
+
+        <!-- Contact Info -->
+        <div>
+          <h4 class="text-white font-semibold mb-5">Contact Us</h4>
+          <address class="not-italic text-sm leading-relaxed space-y-2.5">
+            <p>Kima's Square, G.M. Cordova St., Mandalagan<br>Bacolod City, Negros Occidental<br>Philippines</p>
+            <p><span class="text-white">Phone:</span> <a href="tel:+639913394705" class="hover:text-blue-400 transition-colors">+63 991 339 4705</a></p>
+            <p><span class="text-white">Email:</span> <a href="mailto:admin@rootlabs.dev" class="hover:text-blue-400 transition-colors">admin@rootlabs.dev</a></p>
+          </address>
+        </div>
+
       </div>
     </div>
 
-    <div class="container">
-      <div class="copyright">
-        &copy; Copyright <strong><span>Rootlabs</span></strong>. All Rights Reserved
-      </div>
-      <div class="credits">
+    <!-- Bottom Bar -->
+    <div class="border-t border-slate-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
+        <p>&copy; <span id="copyright-year">2024</span> <strong class="text-white">Rootlabs</strong>. All Rights Reserved.</p>
+        <a href="privacy_policy/" class="hover:text-blue-400 transition-colors">Privacy Policy</a>
       </div>
     </div>
-  </footer><!-- End Footer -->
 
-  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+  </footer>
+  <!-- End Footer -->
 
-  <!-- Vendor JS Files -->
-  <script src="assets/vendor/purecounter/purecounter.js"></script>
+  <!-- Back to Top -->
+  <a id="back-to-top" href="#hero" aria-label="Back to top"
+     class="fixed bottom-6 right-6 w-11 h-11 bg-blue-600 hover:bg-blue-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-600/30 transition-all hover:-translate-y-0.5 z-50">
+    <i class="bi bi-arrow-up-short text-xl"></i>
+  </a>
+
+  <!-- AOS -->
   <script src="assets/vendor/aos/aos.js"></script>
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
-  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
-  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
-  <script src="assets/vendor/php-email-form/validate.js"></script>
+  <!-- PureCounter -->
+  <script src="assets/vendor/purecounter/purecounter.js"></script>
 
-  <!-- Template Main JS File -->
-  <script src="assets/js/main.js"></script>
+  <script>
+    // Init AOS
+    AOS.init({ once: true, duration: 650, easing: 'ease-out-quad' });
+
+    // Copyright year
+    document.getElementById('copyright-year').textContent = new Date().getFullYear();
+
+    // Mobile menu
+    const menuIcon   = document.getElementById('menu-icon');
+    const mobileMenu = document.getElementById('mobile-menu');
+    let menuOpen = false;
+
+    window.toggleMenu = function() {
+      menuOpen = !menuOpen;
+      mobileMenu.classList.toggle('is-open', menuOpen);
+      menuIcon.className = menuOpen ? 'bi bi-x-lg text-2xl' : 'bi bi-list text-2xl';
+    };
+
+    window.closeMenu = function() {
+      menuOpen = false;
+      mobileMenu.classList.remove('is-open');
+      menuIcon.className = 'bi bi-list text-2xl';
+    };
+
+    // Close on nav link click
+    document.querySelectorAll('.mobile-nav-link').forEach(link => {
+      link.addEventListener('click', window.closeMenu);
+    });
+
+    // Header shadow on scroll
+    const header = document.getElementById('site-header');
+    window.addEventListener('scroll', () => {
+      header.classList.toggle('shadow-md', window.scrollY > 20);
+    });
+
+    // Back to top button
+    const backToTop = document.getElementById('back-to-top');
+    window.addEventListener('scroll', () => {
+      backToTop.classList.toggle('show', window.scrollY > 300);
+    });
+
+    // Active nav link on scroll
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks  = document.querySelectorAll('.nav-link');
+    const observer  = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navLinks.forEach(l => l.classList.remove('active'));
+          const active = document.querySelector(`.nav-link[href="#${entry.target.id}"]`);
+          if (active) active.classList.add('active');
+        }
+      });
+    }, { threshold: 0.4 });
+    sections.forEach(s => observer.observe(s));
+  </script>
 
 </body>
 
