@@ -1,0 +1,12 @@
+# GitHub Pages / Jekyll — keep dev tooling out of the site build
+exclude:
+  - node_modules
+  - "**/node_modules"
+  - test-results
+  - "**/test-results"
+  - playwright-report
+  - "**/playwright-report"
+  - package.json
+  - package-lock.json
+  - playwright.config.js
+  - "**/tests"
