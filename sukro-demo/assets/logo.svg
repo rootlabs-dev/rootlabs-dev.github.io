@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 280" width="240" height="280">
+  <!-- Top brown parallelogram (top half of S) -->
+  <polygon points="90,25 125,10 125,115 90,130" fill="#6B5A4A"/>
+  <!-- Middle beige diamond -->
+  <polygon points="85,135 120,115 155,135 120,155" fill="#C9B89A"/>
+  <!-- Bottom brown parallelogram (bottom half of S) -->
+  <polygon points="120,140 155,125 155,225 120,240" fill="#6B5A4A"/>
+  <!-- Sukro text in olive green -->
+  <text x="120" y="270" text-anchor="middle" font-family="'Georgia', 'Times New Roman', serif" font-size="40" font-weight="400" fill="#9CAF3C" font-style="italic">Sukro</text>
+</svg>

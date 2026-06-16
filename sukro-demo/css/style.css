@@ -1,0 +1,70 @@
+/* Sukro Hotel - Custom Styles */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Form input focus styles */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+}
+
+/* Smooth hover for images */
+img {
+  transition: transform 0.5s ease;
+}
+
+/* Date input styling */
+input[type="date"] {
+  color: #2C2A28;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #F5F1E8;
+}
+::-webkit-scrollbar-thumb {
+  background: #9CAF3C;
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #6B5A4A;
+}
+
+/* Lightbox */
+.lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.9);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.lightbox.active {
+  display: flex;
+}
+.lightbox img {
+  max-width: 90%;
+  max-height: 90vh;
+  object-fit: contain;
+}
+.lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  color: white;
+  font-size: 36px;
+  cursor: pointer;
+  background: none;
+  border: none;
+}

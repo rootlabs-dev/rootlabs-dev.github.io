@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sukro Hotel | Modern Comfort in Bacolod City, Philippines</title>
+  <meta name="description" content="Sukro Hotel offers modern, comfortable rooms on La Salle Avenue, Bacolod City. Ideal for business and leisure travelers in the heart of Negros Occidental." />
+  <meta name="keywords" content="Sukro Hotel, Bacolod hotel, La Salle Avenue hotel, Philippines hotel, Negros Occidental accommodation" />
+  <meta name="author" content="Sukro by Isecure Realty Corporation" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Sukro Hotel | Modern Comfort in Bacolod City" />
+  <meta property="og:description" content="Experience modern comfort at Sukro Hotel, located on La Salle Avenue, Bacolod City, Philippines." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.sukrohotel.com/" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Sukro Hotel | Modern Comfort in Bacolod City" />
+  <meta name="twitter:description" content="Experience modern comfort at Sukro Hotel, located on La Salle Avenue, Bacolod City, Philippines." />
+
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'sukro-brown': '#6B5A4A',
+            'sukro-olive': '#9CAF3C',
+            'sukro-beige': '#C9B89A',
+            'sukro-cream': '#F5F1E8',
+            'sukro-dark': '#2C2A28',
+          },
+          fontFamily: {
+            'serif': ['Georgia', 'Times New Roman', 'serif'],
+            'sans': ['Inter', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="font-sans text-sukro-dark bg-white">
+
+  <!-- TOP BAR -->
+  <div class="bg-sukro-dark text-white text-sm hidden md:block">
+    <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
+      <div class="flex gap-6">
+        <a href="tel:+639178900920" class="hover:text-sukro-olive transition flex items-center gap-2">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
+          0917 890 0920
+        </a>
+        <a href="mailto:sukro.reservations@gmail.com" class="hover:text-sukro-olive transition flex items-center gap-2">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
+          sukro.reservations@gmail.com
+        </a>
+      </div>
+      <div class="flex gap-3">
+        <a href="https://www.facebook.com/sukrobyisecurerealtycorporation" target="_blank" rel="noopener" aria-label="Facebook" class="hover:text-sukro-olive transition">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        </a>
+        <a href="#" aria-label="Instagram" class="hover:text-sukro-olive transition">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVIGATION -->
+  <header class="bg-white shadow-sm sticky top-0 z-50">
+    <nav class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3">
+        <img src="assets/logo.svg" alt="Sukro Logo" class="h-14 w-auto" />
+        <div class="hidden sm:block">
+          <div class="text-xl font-serif text-sukro-brown leading-tight">Sukro</div>
+          <div class="text-xs text-gray-500 tracking-widest uppercase">Hotel</div>
+        </div>
+      </a>
+
+      <button id="mobileMenuBtn" class="md:hidden text-sukro-brown" aria-label="Open menu">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+
+      <ul class="hidden md:flex items-center gap-8 text-sm font-medium">
+        <li><a href="index.html" class="text-sukro-olive border-b-2 border-sukro-olive pb-1">Home</a></li>
+        <li><a href="rooms.html" class="text-gray-700 hover:text-sukro-olive transition">Rooms</a></li>
+        <li><a href="amenities.html" class="text-gray-700 hover:text-sukro-olive transition">Amenities</a></li>
+        <li><a href="about.html" class="text-gray-700 hover:text-sukro-olive transition">About</a></li>
+        <li><a href="gallery.html" class="text-gray-700 hover:text-sukro-olive transition">Gallery</a></li>
+        <li><a href="contact.html" class="text-gray-700 hover:text-sukro-olive transition">Contact</a></li>
+      </ul>
+
+      <a href="contact.html" class="hidden md:inline-block bg-sukro-olive hover:bg-sukro-brown text-white font-medium px-5 py-2.5 rounded transition">
+        Book Now
+      </a>
+    </nav>
+
+    <!-- Mobile menu -->
+    <div id="mobileMenu" class="md:hidden hidden bg-white border-t">
+      <ul class="px-4 py-4 space-y-3 text-base">
+        <li><a href="index.html" class="block py-2 text-sukro-olive font-medium">Home</a></li>
+        <li><a href="rooms.html" class="block py-2 text-gray-700">Rooms</a></li>
+        <li><a href="amenities.html" class="block py-2 text-gray-700">Amenities</a></li>
+        <li><a href="about.html" class="block py-2 text-gray-700">About</a></li>
+        <li><a href="gallery.html" class="block py-2 text-gray-700">Gallery</a></li>
+        <li><a href="contact.html" class="block py-2 text-gray-700">Contact</a></li>
+        <li><a href="contact.html" class="block bg-sukro-olive text-white text-center py-3 rounded mt-2">Book Now</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="relative h-[600px] md:h-[700px] bg-gradient-to-br from-sukro-brown via-sukro-dark to-black overflow-hidden">
+    <div class="absolute inset-0">
+      <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
+           alt="Sukro Hotel Lobby"
+           class="w-full h-full object-cover opacity-50" />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/40"></div>
+    </div>
+
+    <div class="relative max-w-7xl mx-auto px-4 h-full flex flex-col justify-center text-white">
+      <div class="max-w-2xl">
+        <p class="text-sukro-olive uppercase tracking-[0.3em] text-sm mb-4 font-medium">Welcome to Sukro Hotel</p>
+        <h1 class="text-4xl md:text-6xl font-serif font-light leading-tight mb-6">
+          Modern Comfort<br/>
+          <span class="text-sukro-olive italic">in the Heart of</span><br/>
+          Bacolod City
+        </h1>
+        <p class="text-lg md:text-xl text-gray-200 mb-8 max-w-xl">
+          A contemporary retreat on La Salle Avenue — where comfort meets convenience for the discerning traveler.
+        </p>
+        <div class="flex flex-wrap gap-4">
+          <a href="rooms.html" class="bg-sukro-olive hover:bg-white hover:text-sukro-brown text-white font-medium px-8 py-3.5 rounded transition">
+            Explore Our Rooms
+          </a>
+          <a href="contact.html" class="border-2 border-white hover:bg-white hover:text-sukro-brown text-white font-medium px-8 py-3.5 rounded transition">
+            Book Your Stay
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick booking bar -->
+    <div class="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur hidden md:block">
+      <div class="max-w-7xl mx-auto px-4 py-5 grid grid-cols-4 gap-4">
+        <div>
+          <label class="text-xs text-gray-500 uppercase tracking-wider">Check-in</label>
+          <input type="date" class="w-full mt-1 text-sukro-dark font-medium focus:outline-none" />
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 uppercase tracking-wider">Check-out</label>
+          <input type="date" class="w-full mt-1 text-sukro-dark font-medium focus:outline-none" />
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 uppercase tracking-wider">Guests</label>
+          <select class="w-full mt-1 text-sukro-dark font-medium focus:outline-none bg-transparent">
+            <option>1 Adult</option>
+            <option>2 Adults</option>
+            <option>2 Adults, 1 Child</option>
+            <option>Family</option>
+          </select>
+        </div>
+        <div>
+          <a href="contact.html" class="block w-full bg-sukro-olive hover:bg-sukro-brown text-white text-center font-medium py-2.5 rounded transition">
+            Check Availability
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTRO -->
+  <section class="py-20 px-4">
+    <div class="max-w-4xl mx-auto text-center">
+      <p class="text-sukro-olive uppercase tracking-[0.3em] text-sm mb-4">Discover Sukro</p>
+      <h2 class="text-3xl md:text-5xl font-serif text-sukro-dark mb-6">A Stay That Feels Like Home</h2>
+      <p class="text-lg text-gray-600 leading-relaxed">
+        Nestled on the vibrant La Salle Avenue in Bacolod City, Sukro Hotel blends modern design with warm Filipino hospitality. Whether you're here for business, leisure, or a quick getaway, our thoughtfully appointed rooms and dedicated service ensure every moment of your stay is exceptional.
+      </p>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="bg-sukro-cream py-20 px-4">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-14">
+        <p class="text-sukro-olive uppercase tracking-[0.3em] text-sm mb-3">Why Choose Us</p>
+        <h2 class="text-3xl md:text-4xl font-serif text-sukro-dark">Designed for the Modern Traveler</h2>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="bg-white p-8 rounded-lg shadow-sm hover:shadow-md transition">
+          <div class="w-14 h-14 bg-sukro-olive/10 rounded-full flex items-center justify-center mb-5">
+            <svg class="w-7 h-7 text-sukro-olive" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
+          <h3 class="text-xl font-serif mb-3">Prime Location</h3>
+          <p class="text-gray-600">Right on La Salle Avenue — close to business centers, restaurants, and Bacolod's top attractions.</p>
+        </div>
+
+        <div class="bg-white p-8 rounded-lg shadow-sm hover:shadow-md transition">
+          <div class="w-14 h-14 bg-sukro-olive/10 rounded-full flex items-center justify-center mb-5">
+            <svg class="w-7 h-7 text-sukro-olive" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          </div>
+          <h3 class="text-xl font-serif mb-3">Modern Rooms</h3>
+          <p class="text-gray-600">Thoughtfully designed rooms with contemporary amenities, fast Wi-Fi, and plush bedding.</p>
+        </div>
+
+        <div class="bg-white p-8 rounded-lg shadow-sm hover:shadow-md transition">
+          <div class="w-14 h-14 bg-sukro-olive/10 rounded-full flex items-center justify-center mb-5">
+            <svg class="w-7 h-7 text-sukro-olive" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <h3 class="text-xl font-serif mb-3">24/7 Service</h3>
+          <p class="text-gray-600">Our front desk team is always ready to help — from late check-ins to local recommendations.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROOMS PREVIEW -->
+  <section class="py-20 px-4">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-12">
+        <div>
+          <p class="text-sukro-olive uppercase tracking-[0.3em] text-sm mb-3">Accommodations</p>
+          <h2 class="text-3xl md:text-4xl font-serif text-sukro-dark">Our Rooms</h2>
+        </div>
+        <a href="rooms.html" class="mt-4 md:mt-0 text-sukro-olive hover:text-sukro-brown font-medium inline-flex items-center gap-2">
+          View All Rooms
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+        </a>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <article class="group cursor-pointer">
+          <div class="relative overflow-hidden rounded-lg aspect-[4/3] mb-4">
+            <img src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                 alt="Standard Room"
+                 class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+          </div>
+          <h3 class="text-xl font-serif mb-2">Standard Room</h3>
+          <p class="text-gray-600 text-sm mb-3">Cozy and functional — perfect for solo travelers and short stays.</p>
+          <p class="text-sukro-olive font-medium">From ₱1,500 / night</p>
+        </article>
+
+        <article class="group cursor-pointer">
+          <div class="relative overflow-hidden rounded-lg aspect-[4/3] mb-4">
+            <img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                 alt="Deluxe Room"
+                 class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+          </div>
+          <h3 class="text-xl font-serif mb-2">Deluxe Room</h3>
+          <p class="text-gray-600 text-sm mb-3">Spacious comfort with premium amenities for a restful stay.</p>
+          <p class="text-sukro-olive font-medium">From ₱2,200 / night</p>
+        </article>
+
+        <article class="group cursor-pointer">
+          <div class="relative overflow-hidden rounded-lg aspect-[4/3] mb-4">
+            <img src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                 alt="Suite"
+                 class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+          </div>
+          <h3 class="text-xl font-serif mb-2">Executive Suite</h3>
+          <p class="text-gray-600 text-sm mb-3">Our finest room — a generous space for families or extended stays.</p>
+          <p class="text-sukro-olive font-medium">From ₱3,200 / night</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="relative py-24 px-4 bg-sukro-brown text-white">
+    <div class="absolute inset-0 opacity-20">
+      <img src="https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
+           alt="" class="w-full h-full object-cover" />
+    </div>
+    <div class="relative max-w-4xl mx-auto text-center">
+      <h2 class="text-3xl md:text-5xl font-serif mb-6">Ready to Experience Sukro?</h2>
+      <p class="text-lg text-gray-200 mb-8 max-w-2xl mx-auto">
+        Book directly with us for the best rates and personalized service. Our team is here to make your Bacolod visit unforgettable.
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="contact.html" class="bg-sukro-olive hover:bg-white hover:text-sukro-brown text-white font-medium px-8 py-3.5 rounded transition">
+          Reserve Your Room
+        </a>
+        <a href="tel:+639178900920" class="border-2 border-white hover:bg-white hover:text-sukro-brown text-white font-medium px-8 py-3.5 rounded transition">
+          Call 0917 890 0920
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOCATION -->
+  <section class="py-20 px-4">
+    <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+      <div>
+        <p class="text-sukro-olive uppercase tracking-[0.3em] text-sm mb-3">Find Us</p>
+        <h2 class="text-3xl md:text-4xl font-serif text-sukro-dark mb-6">In the Heart of Bacolod</h2>
+        <p class="text-gray-600 mb-6 leading-relaxed">
+          Sukro Hotel is conveniently located on La Salle Avenue, one of Bacolod City's main thoroughfares. We're minutes away from the city's business district, shopping centers, and famous tourist spots.
+        </p>
+        <div class="space-y-4">
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-sukro-olive mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+            <div>
+              <p class="font-medium">Address</p>
+              <p class="text-gray-600">La Salle Avenue, Bacolod City, Philippines, 6100</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-sukro-olive mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
+            <div>
+              <p class="font-medium">Phone</p>
+              <a href="tel:+639178900920" class="text-gray-600 hover:text-sukro-olive">0917 890 0920</a>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-sukro-olive mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
+            <div>
+              <p class="font-medium">Email</p>
+              <a href="mailto:sukro.reservations@gmail.com" class="text-gray-600 hover:text-sukro-olive">sukro.reservations@gmail.com</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-lg overflow-hidden shadow-lg aspect-[4/3]">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3925.5!2d122.95!3d10.67!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sLa+Salle+Avenue%2C+Bacolod+City!5e0!3m2!1sen!2sph!4v1700000000000"
+          width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+          title="Sukro Hotel Location">
+        </iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="bg-sukro-dark text-gray-300 pt-16 pb-8 px-4">
+    <div class="max-w-7xl mx-auto grid md:grid-cols-4 gap-10 mb-12">
+      <div>
+        <img src="assets/logo.svg" alt="Sukro Logo" class="h-16 mb-4 brightness-0 invert" style="filter: brightness(0) invert(1);" />
+        <p class="text-sm leading-relaxed">Modern comfort in the heart of Bacolod City. Your home away from home.</p>
+      </div>
+
+      <div>
+        <h4 class="text-white font-medium mb-4">Explore</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="index.html" class="hover:text-sukro-olive transition">Home</a></li>
+          <li><a href="rooms.html" class="hover:text-sukro-olive transition">Rooms</a></li>
+          <li><a href="amenities.html" class="hover:text-sukro-olive transition">Amenities</a></li>
+          <li><a href="about.html" class="hover:text-sukro-olive transition">About</a></li>
+          <li><a href="gallery.html" class="hover:text-sukro-olive transition">Gallery</a></li>
+          <li><a href="contact.html" class="hover:text-sukro-olive transition">Contact</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="text-white font-medium mb-4">Contact</h4>
+        <ul class="space-y-2 text-sm">
+          <li>La Salle Avenue, Bacolod City, Philippines, 6100</li>
+          <li><a href="tel:+639178900920" class="hover:text-sukro-olive transition">0917 890 0920</a></li>
+          <li><a href="mailto:sukro.reservations@gmail.com" class="hover:text-sukro-olive transition">sukro.reservations@gmail.com</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="text-white font-medium mb-4">Follow Us</h4>
+        <div class="flex gap-3 mb-4">
+          <a href="https://www.facebook.com/sukrobyisecurerealtycorporation" target="_blank" rel="noopener" class="w-10 h-10 bg-white/10 hover:bg-sukro-olive rounded-full flex items-center justify-center transition" aria-label="Facebook">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          </a>
+          <a href="#" class="w-10 h-10 bg-white/10 hover:bg-sukro-olive rounded-full flex items-center justify-center transition" aria-label="Instagram">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+          </a>
+        </div>
+        <p class="text-xs text-gray-400">A proud property of Isecure Realty Corporation</p>
+      </div>
+    </div>
+
+    <div class="border-t border-white/10 pt-6 text-center text-sm text-gray-400">
+      <p>&copy; 2026 Sukro Hotel. All rights reserved. | <a href="#" class="hover:text-sukro-olive">Privacy Policy</a></p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

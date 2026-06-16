@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Page Not Found | Sukro Hotel</title>
+  <meta name="description" content="The page you are looking for could not be found." />
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'sukro-brown': '#6B5A4A',
+            'sukro-olive': '#9CAF3C',
+            'sukro-beige': '#C9B89A',
+            'sukro-cream': '#F5F1E8',
+            'sukro-dark': '#2C2A28',
+          },
+          fontFamily: {
+            'serif': ['Georgia', 'Times New Roman', 'serif'],
+            'sans': ['Inter', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="font-sans text-sukro-dark bg-white min-h-screen flex flex-col">
+
+  <header class="bg-white shadow-sm">
+    <nav class="max-w-7xl mx-auto px-4 py-4">
+      <a href="index.html" class="flex items-center gap-3">
+        <img src="assets/logo.svg" alt="Sukro Logo" class="h-14 w-auto" />
+        <div>
+          <div class="text-xl font-serif text-sukro-brown leading-tight">Sukro</div>
+          <div class="text-xs text-gray-500 tracking-widest uppercase">Hotel</div>
+        </div>
+      </a>
+    </nav>
+  </header>
+
+  <main class="flex-1 flex items-center justify-center px-4 py-20">
+    <div class="text-center max-w-md">
+      <p class="text-8xl font-serif text-sukro-olive mb-4">404</p>
+      <h1 class="text-3xl font-serif mb-4">Page Not Found</h1>
+      <p class="text-gray-600 mb-8">Sorry, the page you're looking for doesn't exist or has been moved. Let us help you get back on track.</p>
+      <div class="flex flex-wrap gap-3 justify-center">
+        <a href="index.html" class="bg-sukro-olive hover:bg-sukro-brown text-white font-medium px-6 py-3 rounded transition">Back to Home</a>
+        <a href="contact.html" class="border-2 border-sukro-brown text-sukro-brown hover:bg-sukro-brown hover:text-white font-medium px-6 py-3 rounded transition">Contact Us</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-sukro-dark text-gray-300 py-6 px-4 text-center text-sm">
+    <p>&copy; 2026 Sukro Hotel. All rights reserved.</p>
+  </footer>
+</body>
+</html>
