@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vacation Villa KM55 | Brgy. Bunga, Salvador Benedicto, Negros Occidental</title>
+  <meta name="description" content="Vacation Villa KM55 — a serene escape in Brgy. Bunga, Salvador Benedicto, Negros Occidental. Enjoy pool villas, cozy rooms, lush gardens, and memorable celebrations.">
+  <meta name="keywords" content="vacation villa km55, salvador benedicto, negros occidental, resort, pool villa, staycation, negros resort">
+  <meta property="og:title" content="Vacation Villa KM55">
+  <meta property="og:description" content="Find time to relax... And memorable moments to celebrate!">
+  <meta property="og:type" content="website">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #1a6b3c;
+      --green-dark: #134d2d;
+      --pink: #d63f7a;
+      --pink-dark: #b8325f;
+      --cream: #faf8f5;
+      --dark: #1a1a1a;
+      --muted: #4b5563;
+      --nav-height: 4.5rem;
+    }
+
+    * { box-sizing: border-box; scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--cream);
+      color: var(--dark);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .font-display { font-family: 'Playfair Display', serif; }
+
+    .text-green { color: var(--green); }
+    .text-pink { color: var(--pink); }
+    .text-muted { color: var(--muted); }
+
+    .section-label {
+      color: var(--pink);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .section-title {
+      color: var(--green);
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      line-height: 1.15;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .nav-link {
+      position: relative;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #374151;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 0.25rem 0;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--pink);
+      transition: width 0.3s;
+    }
+
+    .nav-link:hover::after,
+    .nav-link.active::after,
+    .nav-link:focus-visible::after { width: 100%; }
+
+    .nav-link:focus-visible,
+    .btn:focus-visible,
+    .footer-link:focus-visible,
+    .gallery-img:focus-visible {
+      outline: 2px solid var(--green);
+      outline-offset: 3px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 9999px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn:active { transform: translateY(1px); }
+
+    .btn-pink {
+      background: var(--pink);
+      color: white;
+    }
+
+    .btn-pink:hover { background: var(--pink-dark); }
+
+    .btn-green {
+      background: var(--green);
+      color: white;
+    }
+
+    .btn-green:hover { background: var(--green-dark); }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      color: white;
+    }
+
+    .btn-ghost:hover { background: rgba(255, 255, 255, 0.3); }
+
+    .btn-reset {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .hero-bg,
+    .pool-bg,
+    .night-bg {
+      background-position: center;
+      background-size: cover;
+      position: relative;
+    }
+
+    .hero-bg { background-image: url('images/aerial.png'); }
+    .pool-bg { background-image: url('images/pool1.png'); }
+    .night-bg { background-image: url('images/night.png'); }
+
+    .hero-bg::before,
+    .pool-bg::before,
+    .night-bg::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.35) 55%, rgba(0, 0, 0, 0.2) 100%);
+    }
+
+    .hero-bg::before { background: linear-gradient(to top, rgba(0, 0, 0, 0.78) 0%, rgba(0, 0, 0, 0.45) 50%, rgba(0, 0, 0, 0.25) 100%); }
+
+    .hero-content,
+    .banner-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-title {
+      font-size: clamp(2.25rem, 8vw, 4.5rem);
+      line-height: 1.05;
+      text-shadow: 0 2px 24px rgba(0, 0, 0, 0.7);
+    }
+
+    .hero-subtitle {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      line-height: 1.55;
+      max-width: 32rem;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .feature-card,
+    .room-card,
+    .amenity-card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      transition: box-shadow 0.3s, transform 0.3s;
+    }
+
+    .room-card:hover,
+    .feature-card:hover,
+    .amenity-card:hover {
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+      transform: translateY(-4px);
+    }
+
+    .gallery-img {
+      cursor: pointer;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+
+    .gallery-img:hover { transform: scale(1.02); opacity: 0.92; }
+
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.92);
+      padding: 1rem;
+    }
+
+    .lightbox.open { display: flex; }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.5rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      background: white;
+      outline: none;
+      transition: border 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(26, 107, 60, 0.12);
+    }
+
+    .form-grid-2 {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 480px) {
+      .form-grid-2 { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .footer-link {
+      color: #9ca3af;
+      text-align: left;
+      transition: color 0.2s;
+    }
+
+    .footer-link:hover { color: white; }
+
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: 0;
+      z-index: 10000;
+      background: var(--green);
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 0 0 0.5rem 0.5rem;
+    }
+
+    .skip-link:focus {
+      left: 1rem;
+    }
+
+    @media (max-width: 767px) {
+      .room-price-row {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+<a href="#main-content" class="skip-link">Skip to content</a>
+
+<!-- Navigation -->
+<nav class="fixed top-0 w-full z-50 bg-white/96 backdrop-blur shadow-sm" aria-label="Main navigation">
+  <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+    <button type="button" onclick="showPage('home')" class="btn-reset flex items-center shrink-0" aria-label="Vacation Villa KM55 home">
+      <img src="images/logo.png" alt="" class="h-11 sm:h-12 w-auto" width="120" height="48">
+    </button>
+
+    <div class="hidden md:flex items-center gap-6 lg:gap-7">
+      <button type="button" onclick="showPage('home')" class="nav-link active" id="nav-home">Home</button>
+      <button type="button" onclick="showPage('rooms')" class="nav-link" id="nav-rooms">Rooms</button>
+      <button type="button" onclick="showPage('amenities')" class="nav-link" id="nav-amenities">Amenities</button>
+      <button type="button" onclick="showPage('about')" class="nav-link" id="nav-about">About</button>
+      <button type="button" onclick="showPage('gallery')" class="nav-link" id="nav-gallery">Gallery</button>
+      <button type="button" onclick="showPage('contact')" class="btn btn-pink px-5 py-2 text-sm">Book Now</button>
+    </div>
+
+    <button
+      type="button"
+      id="menuToggle"
+      onclick="toggleMenu()"
+      class="md:hidden btn-reset p-2 rounded-lg hover:bg-gray-100"
+      aria-expanded="false"
+      aria-controls="mobileMenu"
+      aria-label="Open menu"
+    >
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+  </div>
+
+  <div id="mobileMenu" class="hidden md:hidden bg-white border-t px-4 py-3 space-y-1" role="menu">
+    <button type="button" role="menuitem" onclick="showPage('home'); toggleMenu(true)" class="block w-full text-left py-2.5 px-3 rounded-lg hover:bg-gray-50 font-medium btn-reset">Home</button>
+    <button type="button" role="menuitem" onclick="showPage('rooms'); toggleMenu(true)" class="block w-full text-left py-2.5 px-3 rounded-lg hover:bg-gray-50 font-medium btn-reset">Rooms</button>
+    <button type="button" role="menuitem" onclick="showPage('amenities'); toggleMenu(true)" class="block w-full text-left py-2.5 px-3 rounded-lg hover:bg-gray-50 font-medium btn-reset">Amenities</button>
+    <button type="button" role="menuitem" onclick="showPage('about'); toggleMenu(true)" class="block w-full text-left py-2.5 px-3 rounded-lg hover:bg-gray-50 font-medium btn-reset">About</button>
+    <button type="button" role="menuitem" onclick="showPage('gallery'); toggleMenu(true)" class="block w-full text-left py-2.5 px-3 rounded-lg hover:bg-gray-50 font-medium btn-reset">Gallery</button>
+    <button type="button" role="menuitem" onclick="showPage('contact'); toggleMenu(true)" class="block w-full text-left py-2.5 px-3 rounded-lg btn btn-pink mt-1">Book Now</button>
+  </div>
+</nav>
+
+<main id="main-content" class="flex-1 pt-[var(--nav-height)]">
+
+<!-- Home -->
+<section id="page-home" class="page active" aria-label="Home">
+  <div class="hero-bg min-h-[calc(100vh-var(--nav-height))] flex items-end pb-16 sm:pb-20">
+    <div class="hero-content max-w-6xl mx-auto px-4 sm:px-6 w-full text-white">
+      <p class="text-pink-300 font-semibold text-xs sm:text-sm uppercase tracking-widest mb-3">Negros Occidental · Philippines</p>
+      <h1 class="font-display hero-title font-bold mb-4">Find Time<br>to Relax.</h1>
+      <p class="hero-subtitle mb-8">And memorable moments to celebrate — at Vacation Villa KM55.</p>
+      <div class="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
+        <button type="button" onclick="showPage('contact')" class="btn btn-pink px-7 sm:px-8 py-3 text-base w-full sm:w-auto">Reserve Your Stay</button>
+        <button type="button" onclick="showPage('rooms')" class="btn btn-ghost px-7 sm:px-8 py-3 text-base w-full sm:w-auto">See Rooms</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="py-14 sm:py-16 max-w-6xl mx-auto px-4 sm:px-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+      <article class="feature-card p-6 text-center">
+        <div class="text-4xl mb-3" aria-hidden="true">🏊</div>
+        <h2 class="font-display font-semibold text-lg text-green">Private Pools</h2>
+        <p class="text-muted text-sm mt-1">Swim day &amp; night</p>
+      </article>
+      <article class="feature-card p-6 text-center">
+        <div class="text-4xl mb-3" aria-hidden="true">🛏️</div>
+        <h2 class="font-display font-semibold text-lg text-green">Cozy Rooms</h2>
+        <p class="text-muted text-sm mt-1">Nature-inspired style</p>
+      </article>
+      <article class="feature-card p-6 text-center">
+        <div class="text-4xl mb-3" aria-hidden="true">🌿</div>
+        <h2 class="font-display font-semibold text-lg text-green">Lush Gardens</h2>
+        <p class="text-muted text-sm mt-1">Tranquil greenery</p>
+      </article>
+      <article class="feature-card p-6 text-center">
+        <div class="text-4xl mb-3" aria-hidden="true">🎉</div>
+        <h2 class="font-display font-semibold text-lg text-green">Events</h2>
+        <p class="text-muted text-sm mt-1">Perfect celebrations</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="pool-bg py-24 sm:py-32">
+    <div class="banner-content max-w-6xl mx-auto px-4 sm:px-6 text-white text-center">
+      <h2 class="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Your Escape Awaits</h2>
+      <p class="text-base sm:text-lg max-w-xl mx-auto mb-8 text-white/90 leading-relaxed">
+        A stunning pool compound nestled in the highlands of Salvador Benedicto — cool air, lush views, total peace.
+      </p>
+      <button type="button" onclick="showPage('amenities')" class="btn btn-pink px-8 py-3">Explore Amenities</button>
+    </div>
+  </div>
+
+  <div class="py-16 sm:py-20 max-w-6xl mx-auto px-4 sm:px-6">
+    <p class="section-label text-center mb-2">Accommodations</p>
+    <h2 class="section-title text-center mb-10 sm:mb-12">Our Rooms</h2>
+    <div class="grid md:grid-cols-2 gap-6 sm:gap-8">
+      <article class="room-card overflow-hidden cursor-pointer" onclick="showPage('rooms')" onkeydown="if(event.key==='Enter')showPage('rooms')" tabindex="0" role="link" aria-label="View Deluxe Cabin Room details">
+        <img src="images/room1.png" alt="Deluxe Cabin Room interior" class="w-full h-56 sm:h-64 object-cover" loading="lazy">
+        <div class="p-5 sm:p-6">
+          <h3 class="font-display text-xl font-bold mb-1">Deluxe Cabin Room</h3>
+          <p class="text-muted text-sm mb-3 leading-relaxed">Warm wooden interiors, queen bed, AC, TV, mini fridge &amp; private bath</p>
+          <span class="text-sm font-semibold text-pink">See details &amp; rates →</span>
+        </div>
+      </article>
+      <article class="room-card overflow-hidden cursor-pointer" onclick="showPage('rooms')" onkeydown="if(event.key==='Enter')showPage('rooms')" tabindex="0" role="link" aria-label="View Villa Suite details">
+        <img src="images/room2.png" alt="Villa Suite living area" class="w-full h-56 sm:h-64 object-cover" loading="lazy">
+        <div class="p-5 sm:p-6">
+          <h3 class="font-display text-xl font-bold mb-1">Villa Suite</h3>
+          <p class="text-muted text-sm mb-3 leading-relaxed">Spacious suite with living area, premium amenities &amp; pool access</p>
+          <span class="text-sm font-semibold text-pink">See details &amp; rates →</span>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <div class="night-bg py-24 sm:py-28">
+    <div class="banner-content max-w-6xl mx-auto px-4 sm:px-6 text-center text-white">
+      <h2 class="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Evenings to Remember</h2>
+      <p class="text-base sm:text-lg max-w-lg mx-auto mb-8 text-white/85 leading-relaxed">
+        The villa comes alive at night — ambient lighting, poolside lounging, and starlit skies.
+      </p>
+      <button type="button" onclick="showPage('contact')" class="btn btn-pink px-8 py-3">Book Your Date</button>
+    </div>
+  </div>
+</section>
+
+<!-- Rooms -->
+<section id="page-rooms" class="page" aria-label="Rooms">
+  <div class="py-10 sm:py-12 pb-16 sm:pb-20 max-w-6xl mx-auto px-4 sm:px-6">
+    <header class="text-center mb-10 sm:mb-14">
+      <p class="section-label mb-2">Accommodations</p>
+      <h1 class="section-title">Our Rooms</h1>
+      <p class="text-muted mt-3 max-w-xl mx-auto leading-relaxed">
+        Each room blends warmth and comfort with natural highland surroundings.
+      </p>
+    </header>
+
+    <article class="room-card overflow-hidden mb-8 sm:mb-10">
+      <div class="grid md:grid-cols-2">
+        <img src="images/room1.png" alt="Deluxe Cabin Room" class="w-full h-64 sm:h-80 object-cover" loading="lazy">
+        <div class="p-6 sm:p-8 md:p-10 flex flex-col justify-center">
+          <span class="text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full mb-4 inline-block w-fit bg-pink-100 text-pink">Most Popular</span>
+          <h2 class="font-display text-2xl sm:text-3xl font-bold mb-2 text-green">Deluxe Cabin Room</h2>
+          <p class="text-muted mb-5 text-sm sm:text-base leading-relaxed">
+            A cozy retreat with warm pinewood ceilings, a plush queen bed, and rustic-modern décor. Perfect for couples or solo travelers.
+          </p>
+          <ul class="space-y-2 text-sm text-gray-600 mb-6">
+            <li class="flex gap-2 items-start"><span class="text-green shrink-0">✓</span> Queen bed with premium linens</li>
+            <li class="flex gap-2 items-start"><span class="text-green shrink-0">✓</span> Air conditioning &amp; ceiling fan</li>
+            <li class="flex gap-2 items-start"><span class="text-green shrink-0">✓</span> Flat-screen TV</li>
+            <li class="flex gap-2 items-start"><span class="text-green shrink-0">✓</span> Mini refrigerator &amp; electric kettle</li>
+            <li class="flex gap-2 items-start"><span class="text-green shrink-0">✓</span> Private hot &amp; cold shower</li>
+            <li class="flex gap-2 items-start"><span class="text-green shrink-0">✓</span> Pool access included</li>
+          </ul>
+          <div class="room-price-row flex items-center gap-4">
+            <div>
+              <span class="text-2xl sm:text-3xl font-display font-bold text-pink">₱2,500</span>
+              <span class="text-muted text-sm"> / night</span>
+            </div>
+            <button type="button" onclick="showPage('contact')" class="btn btn-pink px-6 py-2 text-sm">Book Now</button>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="room-card overflow-hidden mb-8 sm:mb-10">
+      <div class="grid md:grid-cols-2">
+        <div class="p-6 sm:p-8 md:p-10 flex flex-col justify-center order-2 md:order-1">
+          <h2 class="font-display text-2xl sm:text-3xl font-bold mb-2 text-green">Garden View Room</h2>
+          <p class="text-muted mb-5 text-sm sm:text-base leading-relaxed">
+            Nestled beside the lush gardens with a separate sitting area and a contemporary sofa. Great for small families.
+          </p>
+          <ul class="space-y-2 text-sm text-gray-600 mb-6">
+            <li class="flex gap-2 items-start"><span class="text-green shrink-0">✓</span> Queen bed + sofa bed</li>
+            <li class="flex gap-2 items-start"><span class="text-green shrink-0">✓</span> Air conditioning</li>
+            <li class="flex gap-2 items-start"><span class="text-green shrink-0">✓</span> Garden-facing window</li>
+            <li class="flex gap-2 items-start"><span class="text-green shrink-0">✓</span> TV &amp; entertainment</li>
+            <li class="flex gap-2 items-start"><span class="text-green shrink-0">✓</span> Private bathroom</li>
+            <li class="flex gap-2 items-start"><span class="text-green shrink-0">✓</span> Pool access included</li>
+          </ul>
+          <div class="room-price-row flex items-center gap-4">
+            <div>
+              <span class="text-2xl sm:text-3xl font-display font-bold text-pink">₱3,000</span>
+              <span class="text-muted text-sm"> / night</span>
+            </div>
+            <button type="button" onclick="showPage('contact')" class="btn btn-pink px-6 py-2 text-sm">Book Now</button>
+          </div>
+        </div>
+        <img src="images/room2.png" alt="Garden View Room" class="w-full h-64 sm:h-80 object-cover order-1 md:order-2" loading="lazy">
+      </div>
+    </article>
+
+    <article class="room-card overflow-hidden mb-8 sm:mb-10">
+      <div class="grid md:grid-cols-2">
+        <img src="images/room3.png" alt="Villa Suite" class="w-full h-64 sm:h-80 object-cover" loading="lazy">
+        <div class="p-6 sm:p-8 md:p-10 flex flex-col justify-center">
+          <span class="text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full mb-4 inline-block w-fit bg-green-100 text-green">Best for Groups</span>
+          <h2 class="font-display text-2xl sm:text-3xl font-bold mb-2 text-green">Villa Suite</h2>
+          <p class="text-muted mb-5 text-sm sm:text-base leading-relaxed">
+            Our most spacious stay — a full suite with a living area, ideal for families or small groups celebrating something special.
+          </p>
+          <ul class="space-y-2 text-sm text-gray-600 mb-6">
+            <li class="flex gap-2 items-start"><span class="text-green shrink-0">✓</span> King bed + pull-out sofa</li>
+            <li class="flex gap-2 items-start"><span class="text-green shrink-0">✓</span> Living &amp; dining area</li>
+            <li class="flex gap-2 items-start"><span class="text-green shrink-0">✓</span> 2 air conditioning units</li>
+            <li class="flex gap-2 items-start"><span class="text-green shrink-0">✓</span> Full entertainment system</li>
+            <li class="flex gap-2 items-start"><span class="text-green shrink-0">✓</span> En-suite bath</li>
+            <li class="flex gap-2 items-start"><span class="text-green shrink-0">✓</span> Priority pool access</li>
+          </ul>
+          <div class="room-price-row flex items-center gap-4">
+            <div>
+              <span class="text-2xl sm:text-3xl font-display font-bold text-pink">₱4,500</span>
+              <span class="text-muted text-sm"> / night</span>
+            </div>
+            <button type="button" onclick="showPage('contact')" class="btn btn-pink px-6 py-2 text-sm">Book Now</button>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <aside class="bg-white rounded-2xl p-5 sm:p-6 text-center text-muted text-sm border border-gray-100 leading-relaxed">
+      <strong>Note:</strong> Rates may vary on holidays and weekends. Contact us for group packages, event bookings, and whole-villa reservations.
+    </aside>
+  </div>
+</section>
+
+<!-- Amenities -->
+<section id="page-amenities" class="page" aria-label="Amenities">
+  <div class="py-10 sm:py-12 pb-16 sm:pb-20">
+    <header class="max-w-6xl mx-auto px-4 sm:px-6 text-center mb-10 sm:mb-14">
+      <p class="section-label mb-2">What's Included</p>
+      <h1 class="section-title">Amenities</h1>
+      <p class="text-muted mt-3 max-w-xl mx-auto leading-relaxed">
+        Everything you need for complete rest and unforgettable celebrations.
+      </p>
+    </header>
+
+    <div class="pool-bg py-20 sm:py-24 mb-12 sm:mb-16">
+      <div class="banner-content text-center text-white px-4">
+        <h2 class="font-display text-3xl sm:text-4xl font-bold">Private Swimming Pools</h2>
+        <p class="mt-2 text-white/85">Crystal-clear pools for day and night swimming</p>
+      </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+        <article class="amenity-card p-6 sm:p-8 text-center">
+          <div class="text-5xl mb-4" aria-hidden="true">🏊‍♀️</div>
+          <h3 class="font-display text-xl font-bold mb-2 text-green">Swimming Pools</h3>
+          <p class="text-muted text-sm leading-relaxed">Two pools — a lap pool and leisure pool with swim-up cabanas. Open day and night.</p>
+        </article>
+        <article class="amenity-card p-6 sm:p-8 text-center">
+          <div class="text-5xl mb-4" aria-hidden="true">🛖</div>
+          <h3 class="font-display text-xl font-bold mb-2 text-green">Pool Cabanas</h3>
+          <p class="text-muted text-sm leading-relaxed">Curtained floating cabanas on the pool deck — perfect for lounging or al fresco dining.</p>
+        </article>
+        <article class="amenity-card p-6 sm:p-8 text-center">
+          <div class="text-5xl mb-4" aria-hidden="true">🌿</div>
+          <h3 class="font-display text-xl font-bold mb-2 text-green">Landscaped Gardens</h3>
+          <p class="text-muted text-sm leading-relaxed">Manicured tropical gardens with stone pathways and restful benches.</p>
+        </article>
+        <article class="amenity-card p-6 sm:p-8 text-center">
+          <div class="text-5xl mb-4" aria-hidden="true">🎊</div>
+          <h3 class="font-display text-xl font-bold mb-2 text-green">Event Space</h3>
+          <p class="text-muted text-sm leading-relaxed">Open-air function area for birthdays, anniversaries, reunions, or team events.</p>
+        </article>
+        <article class="amenity-card p-6 sm:p-8 text-center">
+          <div class="text-5xl mb-4" aria-hidden="true">🍽️</div>
+          <h3 class="font-display text-xl font-bold mb-2 text-green">Dining &amp; Lounge</h3>
+          <p class="text-muted text-sm leading-relaxed">Covered outdoor dining and an indoor lounge for meals and evening gatherings.</p>
+        </article>
+        <article class="amenity-card p-6 sm:p-8 text-center">
+          <div class="text-5xl mb-4" aria-hidden="true">🚗</div>
+          <h3 class="font-display text-xl font-bold mb-2 text-green">Free Parking</h3>
+          <p class="text-muted text-sm leading-relaxed">Ample secured parking within the compound for all guests.</p>
+        </article>
+        <article class="amenity-card p-6 sm:p-8 text-center">
+          <div class="text-5xl mb-4" aria-hidden="true">📶</div>
+          <h3 class="font-display text-xl font-bold mb-2 text-green">WiFi Access</h3>
+          <p class="text-muted text-sm leading-relaxed">Fast wireless internet available throughout the property.</p>
+        </article>
+        <article class="amenity-card p-6 sm:p-8 text-center">
+          <div class="text-5xl mb-4" aria-hidden="true">🌄</div>
+          <h3 class="font-display text-xl font-bold mb-2 text-green">Mountain Scenery</h3>
+          <p class="text-muted text-sm leading-relaxed">Misty mountain views and lush greenery of the Negros highlands.</p>
+        </article>
+        <article class="amenity-card p-6 sm:p-8 text-center">
+          <div class="text-5xl mb-4" aria-hidden="true">🔒</div>
+          <h3 class="font-display text-xl font-bold mb-2 text-green">24/7 Security</h3>
+          <p class="text-muted text-sm leading-relaxed">Round-the-clock on-site staff to ensure your safety and comfort.</p>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- About -->
+<section id="page-about" class="page" aria-label="About">
+  <div class="hero-bg py-24 sm:py-32">
+    <div class="banner-content max-w-6xl mx-auto px-4 sm:px-6 text-white text-center">
+      <p class="section-label text-pink-300 mb-3">Our Story</p>
+      <h1 class="font-display text-4xl sm:text-5xl md:text-6xl font-bold">About the Villa</h1>
+    </div>
+  </div>
+
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
+    <div class="grid md:grid-cols-2 gap-10 sm:gap-12 items-center mb-16 sm:mb-20">
+      <div>
+        <h2 class="font-display text-2xl sm:text-3xl font-bold mb-5 text-green">A Place Built for Memories</h2>
+        <p class="text-gray-600 leading-relaxed mb-4">
+          Vacation Villa KM55 is a family-owned compound nestled in the mountains of Brgy. Bunga, Salvador Benedicto, Negros Occidental — about 55 kilometers from Bacolod City.
+        </p>
+        <p class="text-gray-600 leading-relaxed mb-4">
+          Named after its kilometer marker, the villa was built with one vision: to give families, friends, and couples a place where they can truly rest, reconnect, and celebrate life's best moments.
+        </p>
+        <p class="text-gray-600 leading-relaxed">
+          Surrounded by tall trees and the cool highland air of Negros, our compound blends modern comfort with natural warmth — from pinewood-lined rooms to sparkling pools and lush garden pathways.
+        </p>
+      </div>
+      <img src="images/aerial.png" alt="Aerial view of Vacation Villa KM55" class="rounded-2xl shadow-lg w-full h-64 sm:h-72 object-cover" loading="lazy">
+    </div>
+
+    <div class="bg-white rounded-3xl p-6 sm:p-10 shadow-sm mb-12">
+      <h3 class="font-display text-2xl font-bold mb-6 text-center text-green">Why Guests Love It Here</h3>
+      <div class="grid sm:grid-cols-3 gap-6 text-center">
+        <div>
+          <div class="text-4xl mb-3" aria-hidden="true">🧘</div>
+          <h4 class="font-semibold mb-1">True Relaxation</h4>
+          <p class="text-muted text-sm leading-relaxed">Cool highland air, quiet surroundings, zero city noise.</p>
+        </div>
+        <div>
+          <div class="text-4xl mb-3" aria-hidden="true">👨‍👩‍👧</div>
+          <h4 class="font-semibold mb-1">Family-Friendly</h4>
+          <p class="text-muted text-sm leading-relaxed">Safe spaces for kids and large family gatherings.</p>
+        </div>
+        <div>
+          <div class="text-4xl mb-3" aria-hidden="true">🤝</div>
+          <h4 class="font-semibold mb-1">Warm Hospitality</h4>
+          <p class="text-muted text-sm leading-relaxed">Every guest is treated like family from check-in to checkout.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center">
+      <p class="font-display text-xl sm:text-2xl italic text-gray-700 mb-6 leading-relaxed">
+        "Find time to relax... and memorable moments to celebrate!"
+      </p>
+      <button type="button" onclick="showPage('contact')" class="btn btn-green px-8 py-3">Get in Touch</button>
+    </div>
+  </div>
+</section>
+
+<!-- Gallery -->
+<section id="page-gallery" class="page" aria-label="Gallery">
+  <div class="py-10 sm:py-12 pb-16 sm:pb-20 max-w-6xl mx-auto px-4 sm:px-6">
+    <header class="text-center mb-10 sm:mb-14">
+      <p class="section-label mb-2">Photos</p>
+      <h1 class="section-title">Gallery</h1>
+      <p class="text-muted mt-3 leading-relaxed">A glimpse of life at Vacation Villa KM55 — tap any photo to enlarge.</p>
+    </header>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+      <img src="images/aerial.png" alt="Villa exterior aerial view" class="gallery-img w-full h-52 sm:h-56 md:h-64 object-cover rounded-2xl" tabindex="0" onclick="openLightbox(this.src)" onkeydown="if(event.key==='Enter')openLightbox(this.src)" loading="lazy">
+      <img src="images/night.png" alt="Pool area at night" class="gallery-img w-full h-52 sm:h-56 md:h-64 object-cover rounded-2xl" tabindex="0" onclick="openLightbox(this.src)" onkeydown="if(event.key==='Enter')openLightbox(this.src)" loading="lazy">
+      <img src="images/room1.png" alt="Deluxe room" class="gallery-img w-full h-52 sm:h-56 md:h-64 object-cover rounded-2xl" tabindex="0" onclick="openLightbox(this.src)" onkeydown="if(event.key==='Enter')openLightbox(this.src)" loading="lazy">
+      <img src="images/room2.png" alt="Garden room" class="gallery-img w-full h-52 sm:h-56 md:h-64 object-cover rounded-2xl" tabindex="0" onclick="openLightbox(this.src)" onkeydown="if(event.key==='Enter')openLightbox(this.src)" loading="lazy">
+      <img src="images/room3.png" alt="Villa suite" class="gallery-img w-full h-52 sm:h-56 md:h-64 object-cover rounded-2xl" tabindex="0" onclick="openLightbox(this.src)" onkeydown="if(event.key==='Enter')openLightbox(this.src)" loading="lazy">
+      <img src="images/pool1.png" alt="Swimming pool" class="gallery-img w-full h-52 sm:h-56 md:h-64 object-cover rounded-2xl" tabindex="0" onclick="openLightbox(this.src)" onkeydown="if(event.key==='Enter')openLightbox(this.src)" loading="lazy">
+    </div>
+
+    <p class="text-center mt-10 text-muted text-sm">
+      More photos on our
+      <a href="https://www.facebook.com/vacationvillakm55" target="_blank" rel="noopener noreferrer" class="underline text-green">Facebook page</a>
+    </p>
+  </div>
+</section>
+
+<!-- Contact -->
+<section id="page-contact" class="page" aria-label="Contact">
+  <div class="py-10 sm:py-12 pb-16 sm:pb-20 max-w-6xl mx-auto px-4 sm:px-6">
+    <header class="text-center mb-10 sm:mb-14">
+      <p class="section-label mb-2">Reservations</p>
+      <h1 class="section-title">Contact &amp; Book</h1>
+      <p class="text-muted mt-3 max-w-xl mx-auto leading-relaxed">
+        Ready to plan your escape? Send us a message and we'll get back to you within 24 hours.
+      </p>
+    </header>
+
+    <div class="grid lg:grid-cols-2 gap-8 sm:gap-12">
+      <div>
+        <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm mb-6">
+          <h2 class="font-display text-xl font-bold mb-5 text-green">Find Us</h2>
+          <address class="not-italic space-y-4 text-gray-600 text-sm leading-relaxed">
+            <div class="flex gap-3 items-start">
+              <span class="text-xl mt-0.5 shrink-0" aria-hidden="true">📍</span>
+              <div>
+                <p class="font-semibold text-gray-800">Address</p>
+                <p>Brgy. Bunga, Salvador Benedicto,<br>Negros Occidental, Philippines</p>
+              </div>
+            </div>
+            <div class="flex gap-3 items-start">
+              <span class="text-xl mt-0.5 shrink-0" aria-hidden="true">📘</span>
+              <div>
+                <p class="font-semibold text-gray-800">Facebook</p>
+                <a href="https://www.facebook.com/vacationvillakm55" target="_blank" rel="noopener noreferrer" class="hover:underline text-green">facebook.com/vacationvillakm55</a>
+              </div>
+            </div>
+            <div class="flex gap-3 items-start">
+              <span class="text-xl mt-0.5 shrink-0" aria-hidden="true">✉️</span>
+              <div>
+                <p class="font-semibold text-gray-800">Email</p>
+                <a href="mailto:info@vacationvillakm55.com" class="hover:underline text-green">info@vacationvillakm55.com</a>
+              </div>
+            </div>
+          </address>
+        </div>
+        <div class="rounded-2xl overflow-hidden shadow-sm aspect-[4/3] sm:aspect-auto sm:h-[280px]">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126839.2!2d123.052!3d10.527!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33af8e0000000001%3A0x0!2sSalvador+Benedicto%2C+Negros+Occidental!5e0!3m2!1sen!2sph!4v1690000000000!5m2!1sen!2sph"
+            class="w-full h-full min-h-[220px] border-0"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Vacation Villa KM55 location map"
+          ></iframe>
+        </div>
+      </div>
+
+      <form class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm" onsubmit="event.preventDefault(); submitForm();">
+        <h2 class="font-display text-xl font-bold mb-5 text-green">Reservation Inquiry</h2>
+        <div id="formSuccess" class="hidden bg-green-50 border border-green-200 rounded-xl p-4 mb-4 text-green-700 text-sm" role="status">
+          Opening your email client with your inquiry details. We'll reply within 24 hours!
+        </div>
+        <div class="space-y-4">
+          <div class="form-grid-2">
+            <div>
+              <label for="firstName" class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">First Name</label>
+              <input type="text" id="firstName" name="firstName" placeholder="Juan" autocomplete="given-name" required>
+            </div>
+            <div>
+              <label for="lastName" class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Last Name</label>
+              <input type="text" id="lastName" name="lastName" placeholder="Dela Cruz" autocomplete="family-name">
+            </div>
+          </div>
+          <div>
+            <label for="email" class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Email</label>
+            <input type="email" id="email" name="email" placeholder="juan@example.com" autocomplete="email" required>
+          </div>
+          <div>
+            <label for="phone" class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Phone / Viber</label>
+            <input type="tel" id="phone" name="phone" placeholder="+63 912 345 6789" autocomplete="tel">
+          </div>
+          <div class="form-grid-2">
+            <div>
+              <label for="checkin" class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Check-in</label>
+              <input type="date" id="checkin" name="checkin">
+            </div>
+            <div>
+              <label for="checkout" class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Check-out</label>
+              <input type="date" id="checkout" name="checkout">
+            </div>
+          </div>
+          <div>
+            <label for="roomType" class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Room Type</label>
+            <select id="roomType" name="roomType">
+              <option value="">Select a room...</option>
+              <option>Deluxe Cabin Room (₱2,500/night)</option>
+              <option>Garden View Room (₱3,000/night)</option>
+              <option>Villa Suite (₱4,500/night)</option>
+              <option>Whole Villa / Event Booking</option>
+            </select>
+          </div>
+          <div>
+            <label for="guests" class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Number of Guests</label>
+            <input type="number" id="guests" name="guests" placeholder="e.g. 4" min="1">
+          </div>
+          <div>
+            <label for="message" class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Message / Special Requests</label>
+            <textarea id="message" name="message" rows="4" placeholder="Celebrating a birthday? Need early check-in? Let us know..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-pink w-full py-3 rounded-xl text-base">Send Inquiry</button>
+          <p class="text-xs text-gray-400 text-center">We reply within 24 hours via email or Facebook Messenger.</p>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- Shared footer -->
+<footer class="bg-[#1a1a1a] text-gray-300 py-12 sm:py-14" role="contentinfo">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
+    <div>
+      <img src="images/logo.png" alt="Vacation Villa KM55" class="h-14 sm:h-16 mb-4" loading="lazy">
+      <p class="text-sm text-gray-400 leading-relaxed">Find time to relax... And memorable moments to celebrate!</p>
+      <div class="flex gap-4 mt-4">
+        <a href="https://www.facebook.com/vacationvillakm55" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition" aria-label="Facebook page">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+        </a>
+      </div>
+    </div>
+    <div>
+      <h2 class="font-semibold text-white mb-4 text-base">Quick Links</h2>
+      <ul class="space-y-2 text-sm">
+        <li><button type="button" onclick="showPage('home')" class="footer-link btn-reset">Home</button></li>
+        <li><button type="button" onclick="showPage('rooms')" class="footer-link btn-reset">Rooms &amp; Rates</button></li>
+        <li><button type="button" onclick="showPage('amenities')" class="footer-link btn-reset">Amenities</button></li>
+        <li><button type="button" onclick="showPage('gallery')" class="footer-link btn-reset">Gallery</button></li>
+        <li><button type="button" onclick="showPage('contact')" class="footer-link btn-reset">Contact &amp; Book</button></li>
+      </ul>
+    </div>
+    <div class="sm:col-span-2 lg:col-span-1">
+      <h2 class="font-semibold text-white mb-4 text-base">Contact</h2>
+      <ul class="space-y-2 text-sm text-gray-400 leading-relaxed">
+        <li>📍 Brgy. Bunga, Salvador Benedicto, Negros Occidental</li>
+        <li>📘 <a href="https://www.facebook.com/vacationvillakm55" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">facebook.com/vacationvillakm55</a></li>
+        <li>✉️ <a href="mailto:info@vacationvillakm55.com" class="hover:text-white transition">info@vacationvillakm55.com</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-gray-800 mt-10 pt-6 text-center text-xs text-gray-600 px-4">
+    © 2025 Vacation Villa KM55. All rights reserved.
+  </div>
+</footer>
+
+<!-- Lightbox -->
+<div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Image preview" onclick="closeLightbox()">
+  <img id="lightboxImg" src="" alt="Enlarged gallery photo" class="max-w-4xl max-h-[85vh] w-full object-contain rounded-xl">
+  <button type="button" onclick="closeLightbox(event)" class="btn-reset absolute top-4 right-4 text-white text-4xl leading-none p-2" aria-label="Close image preview">×</button>
+</div>
+
+<script>
+const PAGE_TITLES = {
+  home: 'Vacation Villa KM55 | Brgy. Bunga, Salvador Benedicto',
+  rooms: 'Rooms & Rates | Vacation Villa KM55',
+  amenities: 'Amenities | Vacation Villa KM55',
+  about: 'About | Vacation Villa KM55',
+  gallery: 'Gallery | Vacation Villa KM55',
+  contact: 'Contact & Book | Vacation Villa KM55',
+};
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(function (page) {
+    page.classList.remove('active');
+  });
+  var target = document.getElementById('page-' + name);
+  if (target) target.classList.add('active');
+
+  document.querySelectorAll('.nav-link').forEach(function (link) {
+    link.classList.remove('active');
+  });
+  var navEl = document.getElementById('nav-' + name);
+  if (navEl) navEl.classList.add('active');
+
+  document.title = PAGE_TITLES[name] || PAGE_TITLES.home;
+  window.scrollTo(0, 0);
+}
+
+function toggleMenu(forceClose) {
+  var menu = document.getElementById('mobileMenu');
+  var toggle = document.getElementById('menuToggle');
+
+  if (forceClose === true) {
+    menu.classList.add('hidden');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'Open menu');
+    return;
+  }
+
+  if (menu.classList.contains('hidden')) {
+    menu.classList.remove('hidden');
+    toggle.setAttribute('aria-expanded', 'true');
+    toggle.setAttribute('aria-label', 'Close menu');
+  } else {
+    menu.classList.add('hidden');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'Open menu');
+  }
+}
+
+function openLightbox(src) {
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox(event) {
+  if (event) event.stopPropagation();
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function submitForm() {
+  var firstName = document.getElementById('firstName').value.trim();
+  var email = document.getElementById('email').value.trim();
+  if (!firstName || !email) {
+    alert('Please fill in at least your name and email to continue.');
+    return;
+  }
+
+  var subject = encodeURIComponent('Reservation Inquiry - Vacation Villa KM55');
+  var body = encodeURIComponent(
+    'Name: ' + firstName + ' ' + document.getElementById('lastName').value + '\n' +
+    'Email: ' + email + '\n' +
+    'Phone/Viber: ' + document.getElementById('phone').value + '\n' +
+    'Check-in: ' + document.getElementById('checkin').value + '\n' +
+    'Check-out: ' + document.getElementById('checkout').value + '\n' +
+    'Room: ' + document.getElementById('roomType').value + '\n' +
+    'Guests: ' + document.getElementById('guests').value + '\n\n' +
+    'Message:\n' + document.getElementById('message').value
+  );
+
+  window.location.href = 'mailto:info@vacationvillakm55.com?subject=' + subject + '&body=' + body;
+  document.getElementById('formSuccess').classList.remove('hidden');
+}
+
+document.addEventListener('keydown', function (event) {
+  if (event.key === 'Escape') closeLightbox();
+});
+</script>
+</body>
+</html>
