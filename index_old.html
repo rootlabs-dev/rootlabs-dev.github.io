@@ -59,15 +59,6 @@
     }
   </script>
 
-  <!-- Three.js (for 3D hero experience) -->
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
-      }
-    }
-  </script>
-
   <!-- Bootstrap Icons -->
   <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
 
@@ -115,33 +106,6 @@
     /* Back to top */
     #back-to-top { opacity: 0; pointer-events: none; transition: opacity 0.3s; }
     #back-to-top.show { opacity: 1; pointer-events: auto; }
-
-    /* 3D hero background canvas */
-    #hero-bg-canvas {
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      width: 100%;
-      height: 100%;
-    }
-
-    /* 3D hero object container */
-    #hero-3d {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      max-width: 34rem;
-    }
-    #hero-3d canvas {
-      width: 100% !important;
-      height: 100% !important;
-      display: block;
-      touch-action: none;
-    }
-    /* If a device/browser can't run WebGL, hide the 3D mount and fall back to the static image */
-    .no-webgl #hero-3d { display: none; }
-    .no-webgl #hero-fallback-img { display: block !important; }
   </style>
 </head>
 
@@ -197,8 +161,8 @@
   <!-- End Header -->
 
   <!-- ======= Hero Section ======= -->
-  <section id="hero" class="hero-gradient min-h-screen flex items-center pt-16 lg:pt-20 relative overflow-hidden">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 w-full relative z-[1]">
+  <section id="hero" class="hero-gradient min-h-screen flex items-center pt-16 lg:pt-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 w-full">
       <div class="grid lg:grid-cols-2 gap-12 items-center">
 
         <!-- Hero Text -->
@@ -223,11 +187,9 @@
           </div>
         </div>
 
-        <!-- Hero Visual: interactive 3D scene (drag/move your mouse over it) -->
+        <!-- Hero Image -->
         <div data-aos="fade-left" data-aos-duration="700" data-aos-delay="200" class="flex justify-center">
-          <div id="hero-3d" aria-hidden="true"></div>
-          <img id="hero-fallback-img" src="assets/img/hero-img.png" alt="Web development illustration"
-               class="w-full max-w-md lg:max-w-full drop-shadow-2xl" style="display:none;">
+          <img src="assets/img/hero-img.png" alt="Web development illustration" class="w-full max-w-md lg:max-w-full drop-shadow-2xl">
         </div>
 
       </div>
@@ -621,249 +583,6 @@
       });
     }, { threshold: 0.4 });
     sections.forEach(s => observer.observe(s));
-  </script>
-
-  <!-- ======= 3D Hero Experience (Three.js) ======= -->
-  <script type="module">
-    import * as THREE from 'three';
-
-    // Detect WebGL support up front; fall back gracefully to the static image/gradient if missing.
-    function hasWebGL() {
-      try {
-        const canvas = document.createElement('canvas');
-        return !!(window.WebGLRenderingContext &&
-          (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
-      } catch (e) {
-        return false;
-      }
-    }
-
-    if (!hasWebGL()) {
-      document.documentElement.classList.add('no-webgl');
-    } else {
-      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-      // ---------- Ambient particle / floating-shape field behind the hero copy ----------
-      function initHeroBackground() {
-        const section = document.getElementById('hero');
-        if (!section) return;
-
-        const canvas = document.createElement('canvas');
-        canvas.id = 'hero-bg-canvas';
-        section.insertBefore(canvas, section.firstChild);
-
-        let width = section.clientWidth;
-        let height = section.clientHeight;
-
-        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-        renderer.setSize(width, height);
-
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(55, width / height, 0.1, 1000);
-        camera.position.z = 60;
-
-        // Drifting particle field
-        const particleCount = 200;
-        const positions = new Float32Array(particleCount * 3);
-        for (let i = 0; i < particleCount; i++) {
-          positions[i * 3]     = (Math.random() - 0.5) * 160;
-          positions[i * 3 + 1] = (Math.random() - 0.5) * 100;
-          positions[i * 3 + 2] = (Math.random() - 0.5) * 100;
-        }
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        const material = new THREE.PointsMaterial({ color: 0x60a5fa, size: 1.2, transparent: true, opacity: 0.5 });
-        const points = new THREE.Points(geometry, material);
-        scene.add(points);
-
-        // A handful of large soft wireframe shapes for depth
-        const shapeGeos = [
-          new THREE.IcosahedronGeometry(6, 0),
-          new THREE.OctahedronGeometry(5, 0),
-          new THREE.TetrahedronGeometry(5, 0),
-        ];
-        const shapes = [];
-        for (let i = 0; i < 6; i++) {
-          const geo = shapeGeos[i % shapeGeos.length];
-          const mat = new THREE.MeshBasicMaterial({ color: 0x93c5fd, wireframe: true, transparent: true, opacity: 0.3 });
-          const mesh = new THREE.Mesh(geo, mat);
-          mesh.position.set(
-            (Math.random() - 0.5) * 120,
-            (Math.random() - 0.5) * 70,
-            (Math.random() - 0.5) * 60 - 20
-          );
-          mesh.userData.speed = 0.1 + Math.random() * 0.2;
-          scene.add(mesh);
-          shapes.push(mesh);
-        }
-
-        let mouseX = 0, mouseY = 0;
-        window.addEventListener('mousemove', (e) => {
-          mouseX = (e.clientX / window.innerWidth) - 0.5;
-          mouseY = (e.clientY / window.innerHeight) - 0.5;
-        });
-
-        let visible = true;
-        new IntersectionObserver(
-          (entries) => { visible = entries[0].isIntersecting; },
-          { threshold: 0 }
-        ).observe(section);
-
-        function onResize() {
-          width = section.clientWidth;
-          height = section.clientHeight;
-          renderer.setSize(width, height);
-          camera.aspect = width / height;
-          camera.updateProjectionMatrix();
-        }
-        window.addEventListener('resize', onResize);
-
-        const clock = new THREE.Clock();
-        function animate() {
-          requestAnimationFrame(animate);
-          if (!visible || prefersReducedMotion) return;
-          const t = clock.getElapsedTime();
-          points.rotation.y = t * 0.02;
-          shapes.forEach((s) => {
-            s.rotation.x += 0.002 * s.userData.speed;
-            s.rotation.y += 0.003 * s.userData.speed;
-          });
-          camera.position.x += (mouseX * 12 - camera.position.x) * 0.02;
-          camera.position.y += (-mouseY * 8 - camera.position.y) * 0.02;
-          camera.lookAt(scene.position);
-          renderer.render(scene, camera);
-        }
-        animate();
-      }
-
-      // ---------- Centerpiece: rotating 3D object cluster in place of the static hero image ----------
-      function initHeroObject() {
-        const container = document.getElementById('hero-3d');
-        if (!container) return;
-
-        let width = container.clientWidth || 400;
-        let height = container.clientHeight || width;
-
-        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-        renderer.setSize(width, height);
-        container.appendChild(renderer.domElement);
-
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-        camera.position.set(0, 0, 9);
-
-        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1.1);
-        dirLight.position.set(5, 8, 6);
-        scene.add(dirLight);
-        const pointLight = new THREE.PointLight(0xff8a3d, 1.2, 20);
-        pointLight.position.set(-4, -3, 4);
-        scene.add(pointLight);
-
-        const group = new THREE.Group();
-        scene.add(group);
-
-        const core = new THREE.Mesh(
-          new THREE.IcosahedronGeometry(2, 1),
-          new THREE.MeshStandardMaterial({ color: 0x2563eb, metalness: 0.35, roughness: 0.25, flatShading: true })
-        );
-        group.add(core);
-
-        const wire = new THREE.Mesh(
-          new THREE.IcosahedronGeometry(2.35, 1),
-          new THREE.MeshBasicMaterial({ color: 0x93c5fd, wireframe: true, transparent: true, opacity: 0.4 })
-        );
-        group.add(wire);
-
-        // Orbiting "code block" cubes representing bits of custom-built software
-        const orbiters = [];
-        const cubeColors = [0xf97316, 0x38bdf8, 0xffffff];
-        for (let i = 0; i < 8; i++) {
-          const size = 0.28 + Math.random() * 0.22;
-          const mesh = new THREE.Mesh(
-            new THREE.BoxGeometry(size, size, size),
-            new THREE.MeshStandardMaterial({ color: cubeColors[i % cubeColors.length], metalness: 0.2, roughness: 0.4 })
-          );
-          mesh.userData = {
-            radius: 3.4 + Math.random() * 1.6,
-            angle: (i / 8) * Math.PI * 2,
-            tilt: (Math.random() - 0.5) * 1.4,
-            speed: 0.15 + Math.random() * 0.25,
-            spin: 0.5 + Math.random(),
-          };
-          group.add(mesh);
-          orbiters.push(mesh);
-        }
-
-        // Mouse parallax: tilt the whole cluster toward the cursor
-        let targetRotX = 0, targetRotY = 0;
-        container.addEventListener('mousemove', (e) => {
-          const rect = container.getBoundingClientRect();
-          const x = (e.clientX - rect.left) / rect.width - 0.5;
-          const y = (e.clientY - rect.top) / rect.height - 0.5;
-          targetRotY = x * 0.6;
-          targetRotX = y * 0.4;
-        });
-        container.addEventListener('mouseleave', () => { targetRotX = 0; targetRotY = 0; });
-        container.addEventListener('touchmove', (e) => {
-          if (!e.touches[0]) return;
-          const rect = container.getBoundingClientRect();
-          const x = (e.touches[0].clientX - rect.left) / rect.width - 0.5;
-          const y = (e.touches[0].clientY - rect.top) / rect.height - 0.5;
-          targetRotY = x * 0.6;
-          targetRotX = y * 0.4;
-        }, { passive: true });
-
-        let visible = true;
-        new IntersectionObserver(
-          (entries) => { visible = entries[0].isIntersecting; },
-          { threshold: 0 }
-        ).observe(container);
-
-        function onResize() {
-          width = container.clientWidth || width;
-          height = container.clientHeight || width;
-          renderer.setSize(width, height);
-          camera.aspect = width / height;
-          camera.updateProjectionMatrix();
-        }
-        window.addEventListener('resize', onResize);
-        if (window.ResizeObserver) new ResizeObserver(onResize).observe(container);
-
-        const clock = new THREE.Clock();
-        function animate() {
-          requestAnimationFrame(animate);
-          if (!visible) return;
-          const t = clock.getElapsedTime();
-          const autoSpin = prefersReducedMotion ? 0 : t * 0.12;
-
-          group.rotation.y += (targetRotY + autoSpin - group.rotation.y) * 0.04;
-          group.rotation.x += (targetRotX - group.rotation.x) * 0.04;
-          if (!prefersReducedMotion) wire.rotation.y -= 0.002;
-
-          orbiters.forEach((o) => {
-            const a = o.userData.angle + (prefersReducedMotion ? 0 : t * o.userData.speed);
-            o.position.set(
-              Math.cos(a) * o.userData.radius,
-              Math.sin(a) * o.userData.radius * 0.5 + o.userData.tilt,
-              Math.sin(a) * o.userData.radius
-            );
-            if (!prefersReducedMotion) {
-              o.rotation.x += 0.01 * o.userData.spin;
-              o.rotation.y += 0.015 * o.userData.spin;
-            }
-          });
-
-          renderer.render(scene, camera);
-        }
-        animate();
-      }
-
-      initHeroBackground();
-      initHeroObject();
-    }
   </script>
 
 </body>
