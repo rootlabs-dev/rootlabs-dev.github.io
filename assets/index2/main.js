@@ -70,6 +70,8 @@
       workHeight: work.offsetHeight,
       aboutTop: aboutStage.offsetTop,
       contactTop: contactStage.offsetTop,
+      footerTop: $('footer').getBoundingClientRect().top + scrollY,
+      headerHeight: $('.header').offsetHeight,
       end: Math.max(1, document.documentElement.scrollHeight - height)
     };
     dirty = true;
@@ -350,13 +352,14 @@
     const travel = motion ? clamp(y / metrics.heroTravel) : 0;
     workBlend = smooth((y - metrics.workTop + height) / (height * .92));
     departure = smooth((y - metrics.aboutTop + height * .75) / height);
-    const endBlend = smooth((y - metrics.contactTop + height * .7) / height);
+    const endStart = metrics.contactTop - height * .7;
+    const endBlend = smooth((y - endStart) / Math.max(1, Math.min(height, metrics.end - endStart)));
     const heroExit = motion ? smooth((travel - (mobile ? .6 : .08)) / (mobile ? .4 : .9)) : 0;
     hero.style.opacity = 1 - heroExit;
     hero.style.transform = motion && !mobile ? `translate3d(0,${-heroExit * height * .15}px,0) scale(${1 - heroExit * .08})` : '';
     hero.style.pointerEvents = heroExit > .98 ? 'none' : '';
     hero.inert = heroExit > .98;
-    $('.scene-world').style.opacity = mix(1, .42, departure);
+    $('.scene-world').style.opacity = mix(1, .85, departure);
     document.documentElement.style.setProperty('--scene-progress', clamp(y / metrics.end));
     const chapter = endBlend > .35 ? '04 — Grow together' : departure > .3 ? '03 — At our core' : workBlend > .65 ? '02 — The branches' : '01 — Take root';
     if (chapter !== lastChapter) { $('#scene-name').textContent = chapter; lastChapter = chapter; }
@@ -365,13 +368,26 @@
     const push = motion && !mobile ? Math.sin(travel * Math.PI) * .32 * (1 - workBlend) : 0;
     const baseSize = mobile ? Math.min(metrics.treeWidth * .32, metrics.treeHeight / 3.8) : Math.min(width * .2, height * .225);
     const workSize = Math.min(width * (mobile ? .25 : .225), height * .255);
+    // Keep a complete tree beside the about copy, or behind it on stacked layouts.
+    const stackedAbout = mobile || width <= 900;
+    const aboutSize = Math.max(12, Math.min(width * (stackedAbout ? .235 : .095), height * .18,
+      (height - metrics.headerHeight - 48) / 4));
+    const sceneMargin = Math.max(width * .06, 16);
+    const aboutX = stackedAbout ? width - sceneMargin - aboutSize * 1.6 : sceneMargin + aboutSize * 1.6;
+    const aboutY = Math.min(height * .6, height - 24 - aboutSize * 1.8);
+    // Bring the whole tree back for contact, with its roots above the footer.
+    const endFloor = Math.min(height - 24, metrics.footerTop - y - 16);
+    const endSize = Math.max(12, Math.min(width * (mobile ? .235 : .16), height * .2,
+      (endFloor - metrics.headerHeight - 24) / 4));
     camera = {
-      x: mix(mobile ? metrics.treeX : width * .715, width * (mobile ? .075 : .5), workBlend) - departure * width * .23,
-      y: mix(mobile ? metrics.treeTop + metrics.treeHeight * .54 - y : height * .53, height * .52, workBlend) + departure * height * .23,
-      scale: mix(baseSize * (1 + push), workSize, workBlend) * (1 + departure * .35),
+      x: mix(mix(mix(mobile ? metrics.treeX : width * .715, width * (mobile ? .075 : .5), workBlend), aboutX, departure),
+        width - sceneMargin - endSize * 1.6, endBlend),
+      y: mix(mix(mix(mobile ? metrics.treeTop + metrics.treeHeight * .54 - y : height * .53, height * .52, workBlend), aboutY, departure),
+        endFloor - endSize * 1.8, endBlend),
+      scale: mix(mix(mix(baseSize * (1 + push), workSize, workBlend), aboutSize, departure), endSize, endBlend),
       yaw: -.3 + (motion ? Math.sin(elapsed * .17) * .24 + travel * .72 + workBlend * .34 + easedPointer.x * .32 : .2),
-      pitch: -.06 + (motion ? easedPointer.y * .13 + push * .26 - departure * .16 : 0),
-      alpha: 1 - departure * .45
+      pitch: -.06 + (motion ? easedPointer.y * .13 + push * .26 : 0),
+      alpha: mix(1, .85, departure)
     };
     camera.cy = Math.cos(camera.yaw); camera.sy = Math.sin(camera.yaw);
     camera.cp = Math.cos(camera.pitch); camera.sp = Math.sin(camera.pitch);
@@ -430,10 +446,9 @@
     if (workBlend < .02 || departure > .98) return;
     context.lineCap = 'round';
     context.lineJoin = 'round';
-    // Paint the active route last so shared trunk segments keep their glow.
-    const targets = [...cardTargets].sort((a, b) => Number(a.id === activeProject) - Number(b.id === activeProject));
+    // Only the active project has a visible route through the tree.
+    const targets = cardTargets.filter(target => target.id === activeProject);
     targets.forEach(target => {
-      const lit = target.id === activeProject;
       const rootPath = projectedPath(roots[(target.id * 2 + 1) % roots.length]).reverse();
       const trunkPart = Array.from({ length: 27 }, (_, index) => project(curve(trunk, index / 26 * (.4 + target.id * .09))));
       const limb = projectedPath(primaryLimbs[target.id]);
@@ -447,34 +462,32 @@
       const points = [...rootPath, ...trunkPart, ...limb, ...extension];
       // A steady foreground stroke stays readable over cards and the vignette;
       // the travelling pulse is an accent, never the only visible connection.
-      const opacity = workBlend * (1 - departure) * (lit ? .9 : .48);
+      const opacity = workBlend * (1 - departure) * .9;
       trace(points, context);
       // A narrow dark edge also preserves contrast across light project artwork.
       context.globalAlpha = opacity * .65;
       context.strokeStyle = '#081a16';
-      context.lineWidth = lit ? 3.5 : 2.5;
+      context.lineWidth = 3.5;
       context.stroke();
       context.globalAlpha = opacity;
-      context.strokeStyle = lit ? '#91f5d8' : '#75bdae';
-      context.lineWidth = lit ? 1.35 : 1;
-      context.shadowBlur = lit ? 12 : 0;
+      context.strokeStyle = '#91f5d8';
+      context.lineWidth = 1.35;
+      context.shadowBlur = 12;
       context.shadowColor = '#61f5ce';
       context.stroke();
-      if (lit) {
-        context.globalAlpha = opacity * .11;
-        context.lineWidth = 7;
-        context.stroke();
-        if (motion) {
-          const progress = (elapsed * .21 + target.id * .19) % 1;
-          // A short trail makes the direction from roots to project legible.
-          for (let tail = 9; tail >= 0; tail--) {
-            const position = pointAlong(points, ((progress - tail * .006) % 1 + 1) % 1);
-            context.globalAlpha = opacity * (1 - tail / 10);
-            context.beginPath();
-            context.arc(position.x, position.y, tail ? 1.35 : 2.7, 0, Math.PI * 2);
-            context.fillStyle = '#e1fff5';
-            context.fill();
-          }
+      context.globalAlpha = opacity * .11;
+      context.lineWidth = 7;
+      context.stroke();
+      if (motion) {
+        const progress = (elapsed * .21 + target.id * .19) % 1;
+        // A short trail makes the direction from roots to project legible.
+        for (let tail = 9; tail >= 0; tail--) {
+          const position = pointAlong(points, ((progress - tail * .006) % 1 + 1) % 1);
+          context.globalAlpha = opacity * (1 - tail / 10);
+          context.beginPath();
+          context.arc(position.x, position.y, tail ? 1.35 : 2.7, 0, Math.PI * 2);
+          context.fillStyle = '#e1fff5';
+          context.fill();
         }
       }
       context.shadowBlur = 0;

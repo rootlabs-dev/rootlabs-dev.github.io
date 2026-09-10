@@ -63,7 +63,7 @@ main,footer{position:relative;z-index:2}
 .project-invite .mono{color:var(--mint);font-size:9px}
 .project-invite p{font-family:'Space Grotesk',sans-serif;font-size:clamp(24px,2.8vw,40px);letter-spacing:-1.5px}
 .text-link span{color:var(--mint)}
-.about-stage{background:linear-gradient(180deg,#080b1000,#080b1099 25%,#080b10d9 80%,#080b1077);padding-block:110px 60px}
+.about-stage{background:linear-gradient(180deg,#080b1000,#080b1033 25%,#080b1033 80%,#080b1026);padding-block:110px 60px}
 .about{min-height:90svh;align-content:center;border-top:0;padding-block:100px;grid-template-columns:.85fr 2fr}
 .about h2 em{color:var(--mint)}
 .about h2{font-size:clamp(40px,4.8vw,74px)}
