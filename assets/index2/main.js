@@ -214,6 +214,35 @@
     air.push({ position: [(random() - .5) * 4.7, (random() - .5) * 3.7, (random() - .5) * 3], size: .3 + random() * .8, phase: random() * 6.28 });
   }
 
+  // Loose leaf clusters follow the outer twigs, leaving the trunk and the
+  // glowing project paths readable. Build these last to preserve the tree's seed.
+  limbs.forEach(path => {
+    for (let index = 0; index < 42; index++) {
+      const center = curve(path, .65 + random() * .35);
+      const azimuth = random() * Math.PI * 2;
+      const elevation = random() * 2 - 1;
+      const spread = Math.cbrt(random());
+      const ring = Math.sqrt(1 - elevation * elevation) * spread;
+      const position = [
+        center[0] + Math.cos(azimuth) * ring * .23,
+        center[1] + elevation * spread * .16 - .025,
+        center[2] + Math.sin(azimuth) * ring * .21
+      ];
+      const angle = random() * Math.PI * 2;
+      const tilt = (random() - .5) * 1.4;
+      const length = .022 + random() * .022;
+      // Each leaf has its own plane in 3D, so it turns edge-on as we orbit.
+      const axis = [Math.cos(angle) * Math.cos(tilt), Math.sin(angle), Math.cos(angle) * Math.sin(tilt)];
+      const across = [-Math.sin(angle) * Math.cos(tilt), Math.cos(angle), -Math.sin(angle) * Math.sin(tilt)];
+      particles.push({
+        position, phase: random() * Math.PI * 2, size: 1,
+        light: .55 + random() * .45, kind: 4,
+        tip: axis.map(value => value * length),
+        edge: across.map(value => value * length * .55)
+      });
+    }
+  });
+
   const canvas = $('#sculpture');
   const context = canvas.getContext('2d', { alpha: true });
   let pointer = { x: 0, y: 0 };
@@ -388,7 +417,7 @@
       const sway = motion ? Math.sin(elapsed * .65 + particle.position[1] * 2 + particle.phase * .1) * .012 * Math.max(0, -particle.position[1]) : 0;
       const projected = project(particle.position, sway);
       if (projected.x < -5 || projected.x > width + 5 || projected.y < -5 || projected.y > height + 5) continue;
-      visible.push({ ...projected, particle });
+      visible.push({ ...projected, particle, sway });
     }
     // Far particles draw first; depth controls brightness, tint and point size.
     visible.sort((a, b) => a.depth - b.depth);
@@ -397,6 +426,32 @@
       const depthLight = clamp((point.depth + 1.2) / 2.4);
       const flicker = motion ? .85 + .15 * Math.sin(elapsed * 1.3 + particle.phase) : 1;
       context.globalAlpha = (.18 + depthLight * .72) * particle.light * flicker * camera.alpha;
+      if (particle.kind === 4) {
+        const flutter = motion ? Math.sin(elapsed * 1.1 + particle.phase) * .22 : 0;
+        const leafPoint = (tip, edge) => project(particle.position.map((value, axis) =>
+          value + particle.tip[axis] * tip + particle.edge[axis] * edge
+        ), point.sway);
+        const start = leafPoint(-1, 0);
+        const end = leafPoint(1, 0);
+        const left = leafPoint(flutter, 1);
+        const right = leafPoint(-flutter, -1);
+        context.fillStyle = depthLight > .65 ? '#b8f2bc' : depthLight > .4 ? '#72cda2' : '#398f83';
+        context.beginPath();
+        context.moveTo(start.x, start.y);
+        context.quadraticCurveTo(left.x, left.y, end.x, end.y);
+        context.quadraticCurveTo(right.x, right.y, start.x, start.y);
+        context.fill();
+        if (particle.light > .88) {
+          context.globalAlpha *= .45;
+          context.strokeStyle = '#d4ffdb';
+          context.lineWidth = .45;
+          context.beginPath();
+          context.moveTo(start.x, start.y);
+          context.lineTo(end.x, end.y);
+          context.stroke();
+        }
+        continue;
+      }
       context.fillStyle = depthLight > .65 ? '#b5ffe1' : depthLight > .4 ? '#67d6be' : '#4a7997';
       const radius = Math.max(.45, particle.size * point.perspective * camera.scale / 230);
       context.beginPath(); context.arc(point.x, point.y, radius, 0, Math.PI * 2); context.fill();
