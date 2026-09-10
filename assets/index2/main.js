@@ -31,6 +31,8 @@
   setInterval(clock, 60000);
 
   const hero = $('.hero');
+  const heroTreeSpace = $('.hero-tree-space');
+  const phoneLayout = matchMedia('(max-width: 600px), (max-width: 950px) and (max-height: 500px)');
   const heroStage = $('.hero-stage');
   const work = $('#work');
   const aboutStage = $('.about-stage');
@@ -45,7 +47,8 @@
   let metrics = {};
   let width = innerWidth;
   let height = innerHeight;
-  let mobile = width <= 600;
+  let mobile = phoneLayout.matches;
+  let savedScroll = null;
 
   // Observer transitions keep the content in its natural document flow.
   const revealObserver = new IntersectionObserver(entries => {
@@ -56,8 +59,13 @@
   reveals.forEach(element => revealObserver.observe(element));
 
   function measure() {
+    const treeSpace = heroTreeSpace.getBoundingClientRect();
     metrics = {
-      heroTravel: Math.max(1, heroStage.offsetHeight - height),
+      heroTravel: Math.max(1, mobile ? hero.offsetHeight : heroStage.offsetHeight - height),
+      treeTop: treeSpace.top + scrollY,
+      treeX: treeSpace.left + treeSpace.width / 2,
+      treeHeight: treeSpace.height,
+      treeWidth: treeSpace.width,
       workTop: work.getBoundingClientRect().top + scrollY,
       workHeight: work.offsetHeight,
       aboutTop: aboutStage.offsetTop,
@@ -68,11 +76,25 @@
   }
 
   function openDialog(dialog) {
-    dialog.showModal();
+    savedScroll = scrollY;
     lenis?.stop();
     document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = -savedScroll + 'px';
+    document.body.style.width = '100%';
+    dialog.showModal();
+    dialog.scrollTop = 0;
   }
-  function closeDialog(dialog) { dialog.close(); }
+  function unlockPage() {
+    if (savedScroll === null || menu.open || detail.open) return;
+    const y = savedScroll;
+    savedScroll = null;
+    ['overflow', 'position', 'top', 'width'].forEach(property => { document.body.style[property] = ''; });
+    window.scrollTo({ top: y, behavior: 'instant' });
+    lenis?.start();
+    measure();
+  }
+  function closeDialog(dialog) { dialog.close(); unlockPage(); }
   $('.menu-toggle').onclick = () => openDialog(menu);
   $$('dialog').forEach(dialog => {
     dialog.querySelector('.dialog-close').onclick = () => closeDialog(dialog);
@@ -82,11 +104,7 @@
       if (event.clientX < rect.left || event.clientX > rect.right ||
           event.clientY < rect.top || event.clientY > rect.bottom) closeDialog(dialog);
     });
-    dialog.addEventListener('close', () => {
-      document.body.style.overflow = '';
-      lenis?.start();
-      dirty = true;
-    });
+    dialog.addEventListener('close', unlockPage);
   });
 
   function filter(type) {
@@ -118,8 +136,9 @@
     if (menu.open) closeDialog(menu);
     if (anchor.dataset.category) filter(anchor.dataset.category);
     const destination = target === hero ? heroStage : target;
-    if (lenis && motion) lenis.scrollTo(destination, { offset: target === hero ? 0 : -100, duration: 1.5 });
-    else window.scrollTo({ top: destination.getBoundingClientRect().top + scrollY - (target === hero ? 0 : 90), behavior: 'instant' });
+    const offset = target === hero ? 0 : -($('.header').getBoundingClientRect().height + 16);
+    if (lenis && motion) lenis.scrollTo(destination, { offset, duration: 1.5 });
+    else window.scrollTo({ top: destination.getBoundingClientRect().top + scrollY + offset, behavior: 'instant' });
     history.replaceState(null, '', anchor.getAttribute('href'));
   }));
 
@@ -143,9 +162,9 @@
     };
     const highlight = () => { highlighted = id; dirty = true; };
     const release = () => { highlighted = -1; dirty = true; };
-    card.addEventListener('pointerenter', highlight);
+    card.addEventListener('pointerenter', event => { if (event.pointerType !== 'touch') highlight(); });
     card.addEventListener('pointerleave', release);
-    card.addEventListener('focus', highlight);
+    card.addEventListener('focus', () => { if (card.matches(':focus-visible')) highlight(); });
     card.addEventListener('blur', release);
   });
 
@@ -162,7 +181,9 @@
   }
   const trunk = [[0, .88, 0], [-.14, .44, .05], [.12, -.25, -.03], [0, -.97, 0]];
   const limbs = [];
+  const primaryLimbs = [];
   const roots = [];
+  const rootlets = [];
   const particles = [];
   const air = [];
   const branchTips = [
@@ -192,6 +213,7 @@
   branchTips.forEach((tip, index) => {
     const start = curve(trunk, .4 + index * .09);
     const path = [start, [start[0] + tip[0] * .15, start[1] - .2, tip[2] * .3], [tip[0] * .7, tip[1] + .02, tip[2] + .2], tip];
+    primaryLimbs.push(path);
     limbs.push(path);
     populate(path, 540, .058, 1);
     for (let twig = 0; twig < 5; twig++) {
@@ -206,18 +228,67 @@
   for (let index = 0; index < 11; index++) {
     const theta = index / 11 * Math.PI * 2;
     const reach = .52 + random() * .45;
-    const path = [[0, .88, 0], [Math.cos(theta) * .15, 1.02, Math.sin(theta) * .17], [Math.cos(theta) * reach * .7, 1.15, Math.sin(theta) * reach * .7], [Math.cos(theta) * reach, 1.2 + random() * .15, Math.sin(theta) * reach]];
+    const bend = (index % 2 ? 1 : -1) * (.5 + random() * .4);
+    const radial = (distance, angle, y) => [Math.cos(angle) * distance, y, Math.sin(angle) * distance];
+    // Off-axis handles give each root a winding, uneven sweep across the ground.
+    const path = [trunk[0], radial(reach * .36, theta + bend, .96 + random() * .14),
+      radial(reach * .72, theta - bend, 1.34 + random() * .12),
+      radial(reach, theta + bend * .2, 1.18 + random() * .17)];
     roots.push(path);
     populate(path, 210, .04, 3);
+    for (let fork = 0; fork < 2; fork++) {
+      const t = .46 + fork * .24;
+      const origin = curve(path, t);
+      const direction = curve(path, t + .06).map((value, axis) => value - origin[axis]);
+      const angle = theta + (fork ? -1 : 1) * (.5 + random() * .4);
+      const end = radial(reach * (.85 + random() * .3), angle, 1.27 + random() * .13);
+      const forkPath = [origin, origin.map((value, axis) => value + direction[axis] * 2),
+        radial(reach * .82, angle + bend * .35, end[1] + .06), end];
+      rootlets.push(forkPath);
+      populate(forkPath, 72, .018, 3);
+    }
   }
   for (let index = 0; index < 210; index++) {
     air.push({ position: [(random() - .5) * 4.7, (random() - .5) * 3.7, (random() - .5) * 3], size: .3 + random() * .8, phase: random() * 6.28 });
   }
 
-  // Loose leaf clusters follow the outer twigs, leaving the trunk and the
-  // glowing project paths readable. Build these last to preserve the tree's seed.
-  limbs.forEach(path => {
-    for (let index = 0; index < 42; index++) {
+  // Overlapping rings of boughs give the crown the logo's broad, rounded shape.
+  // Branches fill the front and back too, so the silhouette stays full in orbit.
+  const crownStart = limbs.length;
+  const crownLayers = [
+    { count: 9, radius: 1.04, y: -.48, attachment: .43 },
+    { count: 10, radius: 1.02, y: -.94, attachment: .59 },
+    { count: 7, radius: .64, y: -1.34, attachment: .76 }
+  ];
+  crownLayers.forEach((layer, level) => {
+    for (let index = 0; index < layer.count; index++) {
+      const angle = index / layer.count * Math.PI * 2 + level * 1.17;
+      const reach = layer.radius * (.94 + random() * .12);
+      const origin = curve(trunk, layer.attachment + (random() - .5) * .06);
+      const end = [Math.cos(angle) * reach, layer.y + (random() - .5) * .1, Math.sin(angle) * reach];
+      const path = [origin, [origin[0] + end[0] * .18, origin[1] - .18, origin[2] + end[2] * .18],
+        [end[0] * .75, end[1] + .06, end[2] * .75], end];
+      limbs.push(path);
+      populate(path, 95, .032 - level * .005, 1);
+      for (let fork = 0; fork < 3; fork++) {
+        const t = .5 + fork * .19;
+        const start = curve(path, t);
+        const turn = angle + (fork % 2 ? -1 : 1) * (.65 + random() * .45);
+        const spread = .18 + random() * .1;
+        const tip = [start[0] + Math.cos(turn) * spread, start[1] - .1 - random() * .13,
+          start[2] + Math.sin(turn) * spread];
+        const twigPath = [start, vecMix(start, curve(path, t + .1), .8),
+          [tip[0], tip[1] + .07, tip[2]], tip];
+        limbs.push(twigPath);
+        populate(twigPath, 32, .014, 2);
+      }
+    }
+  });
+
+  // Loose leaf clusters follow the outer twigs and the finer crown branches.
+  limbs.forEach((path, limbIndex) => {
+    const leafCount = limbIndex < crownStart ? 42 : 32;
+    for (let index = 0; index < leafCount; index++) {
       const center = curve(path, .65 + random() * .35);
       const azimuth = random() * Math.PI * 2;
       const elevation = random() * 2 - 1;
@@ -245,6 +316,8 @@
 
   const canvas = $('#sculpture');
   const context = canvas.getContext('2d', { alpha: true });
+  const connectionCanvas = $('#project-connections');
+  const connectionContext = connectionCanvas.getContext('2d', { alpha: true });
   let pointer = { x: 0, y: 0 };
   let easedPointer = { x: 0, y: 0 };
   let elapsed = 0;
@@ -258,11 +331,14 @@
   function resize() {
     width = innerWidth;
     height = innerHeight;
-    mobile = width <= 600;
+    mobile = phoneLayout.matches;
     const ratio = Math.min(devicePixelRatio || 1, mobile ? 1.5 : 1.75);
     canvas.width = Math.round(width * ratio);
     canvas.height = Math.round(height * ratio);
     context?.setTransform(ratio, 0, 0, ratio, 0, 0);
+    connectionCanvas.width = canvas.width;
+    connectionCanvas.height = canvas.height;
+    connectionContext?.setTransform(ratio, 0, 0, ratio, 0, 0);
     filter($('.filter.active').dataset.filter);
     measure();
     updateScene();
@@ -275,9 +351,9 @@
     workBlend = smooth((y - metrics.workTop + height) / (height * .92));
     departure = smooth((y - metrics.aboutTop + height * .75) / height);
     const endBlend = smooth((y - metrics.contactTop + height * .7) / height);
-    const heroExit = motion ? smooth((travel - .08) / .9) : 0;
+    const heroExit = motion ? smooth((travel - (mobile ? .6 : .08)) / (mobile ? .4 : .9)) : 0;
     hero.style.opacity = 1 - heroExit;
-    hero.style.transform = motion ? `translate3d(0,${-heroExit * height * .15}px,0) scale(${1 - heroExit * .08})` : '';
+    hero.style.transform = motion && !mobile ? `translate3d(0,${-heroExit * height * .15}px,0) scale(${1 - heroExit * .08})` : '';
     hero.style.pointerEvents = heroExit > .98 ? 'none' : '';
     hero.inert = heroExit > .98;
     $('.scene-world').style.opacity = mix(1, .42, departure);
@@ -286,12 +362,12 @@
     if (chapter !== lastChapter) { $('#scene-name').textContent = chapter; lastChapter = chapter; }
 
     // The camera pushes into the crown, orbits, then settles between the work.
-    const push = motion ? Math.sin(travel * Math.PI) * .32 * (1 - workBlend) : 0;
-    const baseSize = Math.min(width * (mobile ? .37 : .285), height * (mobile ? .265 : .25));
+    const push = motion && !mobile ? Math.sin(travel * Math.PI) * .32 * (1 - workBlend) : 0;
+    const baseSize = mobile ? Math.min(metrics.treeWidth * .32, metrics.treeHeight / 3.8) : Math.min(width * .2, height * .225);
     const workSize = Math.min(width * (mobile ? .25 : .225), height * .255);
     camera = {
-      x: mix(width * (mobile ? .65 : .715), width * (mobile ? .11 : .5), workBlend) - departure * width * .23,
-      y: mix(height * (mobile ? .66 : .53), height * .52, workBlend) + departure * height * .23,
+      x: mix(mobile ? metrics.treeX : width * .715, width * (mobile ? .075 : .5), workBlend) - departure * width * .23,
+      y: mix(mobile ? metrics.treeTop + metrics.treeHeight * .54 - y : height * .53, height * .52, workBlend) + departure * height * .23,
       scale: mix(baseSize * (1 + push), workSize, workBlend) * (1 + departure * .35),
       yaw: -.3 + (motion ? Math.sin(elapsed * .17) * .24 + travel * .72 + workBlend * .34 + easedPointer.x * .32 : .2),
       pitch: -.06 + (motion ? easedPointer.y * .13 + push * .26 - departure * .16 : 0),
@@ -329,9 +405,9 @@
     return { x: camera.x + rx * camera.scale * perspective, y: camera.y + ry * camera.scale * perspective, depth, perspective };
   }
 
-  function trace(points) {
-    context.beginPath();
-    points.forEach((point, index) => index ? context.lineTo(point.x, point.y) : context.moveTo(point.x, point.y));
+  function trace(points, targetContext = context) {
+    targetContext.beginPath();
+    points.forEach((point, index) => index ? targetContext.lineTo(point.x, point.y) : targetContext.moveTo(point.x, point.y));
   }
   function projectedPath(path, count = 36) {
     return Array.from({ length: count }, (_, index) => project(curve(path, index / (count - 1))));
@@ -348,12 +424,19 @@
   }
 
   function drawConnections() {
+    const context = connectionContext;
+    if (!context) return;
+    context.clearRect(0, 0, width, height);
     if (workBlend < .02 || departure > .98) return;
-    cardTargets.forEach(target => {
+    context.lineCap = 'round';
+    context.lineJoin = 'round';
+    // Paint the active route last so shared trunk segments keep their glow.
+    const targets = [...cardTargets].sort((a, b) => Number(a.id === activeProject) - Number(b.id === activeProject));
+    targets.forEach(target => {
       const lit = target.id === activeProject;
       const rootPath = projectedPath(roots[(target.id * 2 + 1) % roots.length]).reverse();
       const trunkPart = Array.from({ length: 27 }, (_, index) => project(curve(trunk, index / 26 * (.4 + target.id * .09))));
-      const limb = projectedPath(limbs[target.id * 6]);
+      const limb = projectedPath(primaryLimbs[target.id]);
       const tip = limb[limb.length - 1];
       const branch = [tip, { x: tip.x + target.side * width * .07, y: tip.y }, { x: target.x - target.side * width * .065, y: target.y }, target];
       const extension = Array.from({ length: 34 }, (_, index) => {
@@ -362,11 +445,18 @@
           y: u*u*u*branch[0].y + 3*u*u*t*branch[1].y + 3*u*t*t*branch[2].y + t*t*t*branch[3].y };
       });
       const points = [...rootPath, ...trunkPart, ...limb, ...extension];
-      const opacity = workBlend * (1 - departure) * (lit ? .86 : .18);
+      // A steady foreground stroke stays readable over cards and the vignette;
+      // the travelling pulse is an accent, never the only visible connection.
+      const opacity = workBlend * (1 - departure) * (lit ? .9 : .48);
+      trace(points, context);
+      // A narrow dark edge also preserves contrast across light project artwork.
+      context.globalAlpha = opacity * .65;
+      context.strokeStyle = '#081a16';
+      context.lineWidth = lit ? 3.5 : 2.5;
+      context.stroke();
       context.globalAlpha = opacity;
-      trace(points);
-      context.strokeStyle = lit ? '#91f5d8' : '#629d9a';
-      context.lineWidth = lit ? 1.25 : .7;
+      context.strokeStyle = lit ? '#91f5d8' : '#75bdae';
+      context.lineWidth = lit ? 1.35 : 1;
       context.shadowBlur = lit ? 12 : 0;
       context.shadowColor = '#61f5ce';
       context.stroke();
@@ -409,12 +499,13 @@
     trace(ground); context.stroke();
     context.globalAlpha = .12 * camera.alpha;
     context.strokeStyle = '#927963';
-    [trunk, ...limbs, ...roots].forEach(path => { trace(projectedPath(path, 20)); context.stroke(); });
+    [trunk, ...limbs, ...roots, ...rootlets].forEach(path => { trace(projectedPath(path, 28)); context.stroke(); });
 
     const visible = [];
-    const stride = mobile ? 3 : 1;
-    for (let index = 0; index < particles.length; index += stride) {
+    for (let index = 0; index < particles.length; index++) {
       const particle = particles[index];
+      // Preserve the canopy on phones while keeping the wood particle budget low.
+      if (mobile && index % (particle.kind === 4 ? 2 : 3)) continue;
       const sway = motion ? Math.sin(elapsed * .65 + particle.position[1] * 2 + particle.phase * .1) * .012 * Math.max(0, -particle.position[1]) : 0;
       const projected = project(particle.position, sway);
       if (projected.x < -5 || projected.x > width + 5 || projected.y < -5 || projected.y > height + 5) continue;
@@ -505,14 +596,14 @@
     }
   });
   window.addEventListener('resize', resize);
-  window.addEventListener('scroll', () => { dirty = true; }, { passive: true });
+  window.addEventListener('scroll', () => { dirty = true; if (!finePointer.matches) highlighted = -1; }, { passive: true });
   document.addEventListener('visibilitychange', () => { lastFrame = 0; dirty = true; });
   document.fonts?.ready.then(measure);
   new ResizeObserver(measure).observe(work);
 
   function frame(time) {
     lenis?.raf(time);
-    if (!document.hidden && (dirty || motion) && time - lastFrame >= (mobile ? 40 : 30)) {
+    if (!document.hidden && !menu.open && !detail.open && (dirty || motion) && time - lastFrame >= (mobile ? 40 : 30)) {
       const delta = Math.min((time - lastFrame) / 1000 || .03, .065);
       if (motion && !menu.open && !detail.open) elapsed += delta;
       easedPointer.x = mix(easedPointer.x, pointer.x, .06);
