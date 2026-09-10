@@ -399,12 +399,14 @@
       if (card.hidden) return;
       const node = card.querySelector('.branch-node').getBoundingClientRect();
       const cy = node.top + node.height / 2;
-      if (cy < -height * .4 || cy > height * 1.4) return;
+      // Only visible attachment points can activate a project connection.
+      // The old overscan kept routes alive above and below the project items.
+      if (cy < metrics.headerHeight || cy > height) return;
       const id = Number(card.dataset.project);
       cardTargets.push({ id, x: node.left + node.width / 2, y: cy, side: mobile || card.dataset.side === 'right' ? 1 : -1 });
       if (Math.abs(cy - height * .52) < distance) { distance = Math.abs(cy - height * .52); nearest = id; }
     });
-    const nextActive = highlighted >= 0 ? highlighted : nearest;
+    const nextActive = cardTargets.some(target => target.id === highlighted) ? highlighted : nearest;
     if (nextActive !== activeProject) {
       activeProject = nextActive;
       cards.forEach(card => card.classList.toggle('is-active', Number(card.dataset.project) === activeProject));
