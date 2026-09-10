@@ -408,6 +408,7 @@
     });
     trace(ground); context.stroke();
     context.globalAlpha = .12 * camera.alpha;
+    context.strokeStyle = '#927963';
     [trunk, ...limbs, ...roots].forEach(path => { trace(projectedPath(path, 20)); context.stroke(); });
 
     const visible = [];
@@ -452,7 +453,7 @@
         }
         continue;
       }
-      context.fillStyle = depthLight > .65 ? '#b5ffe1' : depthLight > .4 ? '#67d6be' : '#4a7997';
+      context.fillStyle = depthLight > .65 ? '#dcc5a7' : depthLight > .4 ? '#b09376' : '#786b60';
       const radius = Math.max(.45, particle.size * point.perspective * camera.scale / 230);
       context.beginPath(); context.arc(point.x, point.y, radius, 0, Math.PI * 2); context.fill();
       if (particle.light > .985) {
