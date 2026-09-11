@@ -35,15 +35,21 @@
   const phoneLayout = matchMedia('(max-width: 600px), (max-width: 950px) and (max-height: 500px)');
   const heroStage = $('.hero-stage');
   const work = $('#work');
+  const workStage = $('.work-stage');
   const aboutStage = $('.about-stage');
   const contactStage = $('.contact-stage');
-  const cards = $$('.project');
+  const gallery = $('.project-gallery');
+  const workTree = $('.work-tree');
+  const projectPanels = $$('.project-panel');
+  const projectChoices = $$('.work-choice');
   const reveals = $$('.reveal');
   const menu = $('.menu-dialog');
   const detail = $('.project-dialog');
   const cursor = $('.cursor');
-  let highlighted = -1;
-  let activeProject = -1;
+  let activeProject = 0;
+  let treeRotation = 0;
+  let treePitch = 0;
+  let branchColor = '#a9daed';
   let metrics = {};
   let width = innerWidth;
   let height = innerHeight;
@@ -60,14 +66,17 @@
 
   function measure() {
     const treeSpace = heroTreeSpace.getBoundingClientRect();
+    const galleryTree = workTree.getBoundingClientRect();
     metrics = {
       heroTravel: Math.max(1, mobile ? hero.offsetHeight : heroStage.offsetHeight - height),
       treeTop: treeSpace.top + scrollY,
       treeX: treeSpace.left + treeSpace.width / 2,
       treeHeight: treeSpace.height,
       treeWidth: treeSpace.width,
-      workTop: work.getBoundingClientRect().top + scrollY,
-      workHeight: work.offsetHeight,
+      workTop: workStage.getBoundingClientRect().top + scrollY,
+      workHeight: workStage.offsetHeight,
+      workTravel: Math.max(1, workStage.offsetHeight - height),
+      workTreeSize: Math.min(galleryTree.width / 3.8, (galleryTree.height - 35) / 4),
       aboutTop: aboutStage.offsetTop,
       contactTop: contactStage.offsetTop,
       footerTop: $('footer').getBoundingClientRect().top + scrollY,
@@ -110,34 +119,90 @@
     dialog.addEventListener('close', unlockPage);
   });
 
-  function filter(type) {
-    $$('.filter').forEach(button => {
-      const selected = button.dataset.filter === type;
-      button.classList.toggle('active', selected);
-      button.setAttribute('aria-pressed', selected);
-    });
-    let index = 0;
-    cards.forEach(card => {
-      card.hidden = type !== 'all' && !card.dataset.type.split(' ').includes(type);
-      if (!card.hidden) {
-        card.dataset.side = index % 2 ? 'right' : 'left';
-        // Filtering repacks the branches without leaving gaps in the grid.
-        card.style.marginTop = !mobile && index % 2 ? (width <= 1100 ? '170px' : '220px') : '0';
-        index++;
-      }
-    });
-    highlighted = -1;
-    measure();
-    lenis?.resize();
+  function setActiveProject(id, revealChoice = true) {
+    activeProject = (id + projectPanels.length) % projectPanels.length;
+    projectChoices.forEach((button, index) => button.setAttribute('aria-pressed', index === activeProject));
+    const selected = projectChoices[activeProject];
+    gallery.dataset.theme = projectPanels[activeProject].dataset.theme;
+    branchColor = getComputedStyle(gallery).getPropertyValue('--project-accent').trim();
+    $('#work-current').textContent = String(activeProject + 1).padStart(2, '0');
+    $('#work-announcement').textContent = ' — ' + selected.querySelector('.choice-name').textContent;
+    // Only move the horizontal selector strip as the current project changes.
+    const strip = $('.work-choices');
+    if (revealChoice && strip.scrollWidth > strip.clientWidth) {
+      const left = selected.offsetLeft - strip.offsetLeft - (strip.clientWidth - selected.offsetWidth) / 2;
+      strip.scrollTo({ left, behavior: motion ? 'smooth' : 'instant' });
+    }
+    dirty = true;
   }
-  $$('.filter').forEach(button => { button.onclick = () => filter(button.dataset.filter); });
+  function selectProject(id) {
+    const next = (id + projectPanels.length) % projectPanels.length;
+    if (document.documentElement.classList.contains('cinematic-work')) {
+      const destination = metrics.workTop + metrics.workTravel * (next + .2) / projectPanels.length;
+      if (lenis) lenis.scrollTo(destination, { duration: 1.2 });
+      else window.scrollTo({ top: destination, behavior: 'instant' });
+      return;
+    }
+    const browser = $('.work-browser');
+    const pinned = getComputedStyle(browser).position === 'sticky';
+    const stacked = matchMedia('(max-width: 900px)').matches;
+    const offset = -(metrics.headerHeight + (stacked && pinned ? browser.offsetHeight : 0) + 24);
+    if (lenis && motion) lenis.scrollTo(projectPanels[next], { offset, duration: 1.2 });
+    else window.scrollTo({ top: projectPanels[next].getBoundingClientRect().top + scrollY + offset, behavior: 'instant' });
+    setActiveProject(next);
+  }
+  projectChoices.forEach((button, index) => {
+    button.addEventListener('click', () => selectProject(index));
+    button.addEventListener('keydown', event => {
+      const directions = { ArrowLeft: -1, ArrowUp: -1, ArrowRight: 1, ArrowDown: 1 };
+      let next;
+      if (event.key in directions) next = (index + directions[event.key] + projectChoices.length) % projectChoices.length;
+      else if (event.key === 'Home') next = 0;
+      else if (event.key === 'End') next = projectChoices.length - 1;
+      else return;
+      event.preventDefault();
+      selectProject(next);
+      projectChoices[next].focus({ preventScroll: true });
+    });
+  });
+  $$('.gallery-step').forEach(button => button.addEventListener('click', () => selectProject(activeProject + Number(button.dataset.step))));
+  gallery.classList.add('gallery-ready');
+
+  // The same particle tree moves into the gallery. Direct rotation also works
+  // with ambient motion disabled, and vertical touch gestures still scroll.
+  let treeDrag;
+  workTree.addEventListener('pointerdown', event => {
+    if (!event.isPrimary || event.button !== 0) return;
+    treeDrag = { x: event.clientX, rotation: treeRotation, id: event.pointerId };
+    workTree.setPointerCapture(event.pointerId);
+    workTree.classList.add('is-dragging');
+  });
+  workTree.addEventListener('pointermove', event => {
+    if (!treeDrag || event.pointerId !== treeDrag.id) return;
+    treeRotation = treeDrag.rotation + (event.clientX - treeDrag.x) * .012;
+    dirty = true;
+  });
+  const releaseTree = () => { treeDrag = null; workTree.classList.remove('is-dragging'); };
+  workTree.addEventListener('pointerup', releaseTree);
+  workTree.addEventListener('pointercancel', releaseTree);
+  workTree.addEventListener('lostpointercapture', releaseTree);
+  workTree.addEventListener('keydown', event => {
+    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home'].includes(event.key)) return;
+    event.preventDefault();
+    if (event.key === 'ArrowLeft') treeRotation -= .25;
+    if (event.key === 'ArrowRight') treeRotation += .25;
+    if (event.key === 'ArrowUp') treePitch = clamp(treePitch - .1, -.5, .5);
+    if (event.key === 'ArrowDown') treePitch = clamp(treePitch + .1, -.5, .5);
+    if (event.key === 'Home') { treeRotation = 0; treePitch = 0; }
+    dirty = true;
+  });
 
   $$('a[href^="#"]').forEach(anchor => anchor.addEventListener('click', event => {
     const target = $(anchor.getAttribute('href'));
     if (!target) return;
     event.preventDefault();
     if (menu.open) closeDialog(menu);
-    if (anchor.dataset.category) filter(anchor.dataset.category);
+    if (anchor.dataset.category) { selectProject(anchor.dataset.category === 'platform' ? 1 : 0); history.replaceState(null, '', '#work'); return; }
     const destination = target === hero ? heroStage : target;
     const offset = target === hero ? 0 : -($('.header').getBoundingClientRect().height + 16);
     if (lenis && motion) lenis.scrollTo(destination, { offset, duration: 1.5 });
@@ -152,23 +217,16 @@
     ['Eventstruct', 'Digital platform / Event management', 'Event management for modern teams. A streamlined platform to plan, organize, and run events efficiently.', 'eventstruct'],
     ['HOAnderful', 'Digital platform / Community management', 'Modern HOA management made simple and powerful. Everything a homeowners association needs in one place.', 'hoanderful']
   ];
-  cards.forEach(card => {
-    const id = Number(card.dataset.project);
-    card.onclick = () => {
-      const [name, category, description, image] = projects[id];
+  $$('.project-detail').forEach(button => {
+    button.addEventListener('click', () => {
+      const [name, category, description, image] = projects[Number(button.dataset.project)];
       $('#project-title').textContent = name;
       $('#project-category').textContent = category;
       $('#project-description').textContent = description;
       $('#project-image').src = 'assets/index2/images/' + image + '.webp';
       $('#project-image').alt = name + ' project preview';
       openDialog(detail);
-    };
-    const highlight = () => { highlighted = id; dirty = true; };
-    const release = () => { highlighted = -1; dirty = true; };
-    card.addEventListener('pointerenter', event => { if (event.pointerType !== 'touch') highlight(); });
-    card.addEventListener('pointerleave', release);
-    card.addEventListener('focus', () => { if (card.matches(':focus-visible')) highlight(); });
-    card.addEventListener('blur', release);
+    });
   });
 
   // Cubic curves describe a real volume. Particles wrap around each branch's
@@ -326,6 +384,8 @@
   const context = canvas.getContext('2d', { alpha: true });
   const connectionCanvas = $('#project-connections');
   const connectionContext = connectionCanvas.getContext('2d', { alpha: true });
+  const workTreeCanvas = $('.work-tree-canvas');
+  const workTreeContext = workTreeCanvas.getContext('2d', { alpha: true });
   let pointer = { x: 0, y: 0 };
   let easedPointer = { x: 0, y: 0 };
   let elapsed = 0;
@@ -337,21 +397,27 @@
   let camera;
   let workBlend = 0;
   let departure = 0;
-  let cardTargets = [];
   let lastChapter = '';
+  let galleryTreeRect;
+  let galleryAlpha = 0;
+  let canvasRatio = 1;
 
   function resize() {
     width = innerWidth;
     height = innerHeight;
     mobile = phoneLayout.matches;
-    const ratio = Math.min(devicePixelRatio || 1, mobile ? 1.5 : 1.75);
+    document.documentElement.classList.toggle('cinematic-work', motion && height > 650);
+    const ratio = canvasRatio = Math.min(devicePixelRatio || 1, mobile ? 1.5 : 1.75);
     canvas.width = Math.round(width * ratio);
     canvas.height = Math.round(height * ratio);
     context?.setTransform(ratio, 0, 0, ratio, 0, 0);
     connectionCanvas.width = canvas.width;
     connectionCanvas.height = canvas.height;
     connectionContext?.setTransform(ratio, 0, 0, ratio, 0, 0);
-    filter($('.filter.active').dataset.filter);
+    workTreeCanvas.width = Math.round(workTree.clientWidth * ratio);
+    workTreeCanvas.height = Math.round(workTree.clientHeight * ratio);
+    workTreeContext?.setTransform(ratio, 0, 0, ratio, 0, 0);
+    setActiveProject(activeProject, false);
     measure();
     smoothY = scrollY;
     updateScene();
@@ -370,15 +436,56 @@
     hero.style.transform = motion && !mobile ? `translate3d(0,${-heroExit * height * .15}px,0) scale(${1 - heroExit * .08})` : '';
     hero.style.pointerEvents = heroExit > .98 ? 'none' : '';
     hero.inert = heroExit > .98;
-    $('.scene-world').style.opacity = mix(1, .85, departure);
+    galleryAlpha = workBlend * (1 - departure);
+    $('.scene-world').style.opacity = mix(1, .85, departure) * (1 - galleryAlpha);
+    connectionCanvas.style.opacity = 1 - galleryAlpha;
+    $('.scene-readout').style.opacity = 1 - galleryAlpha;
     document.documentElement.style.setProperty('--scene-progress', clamp(y / metrics.end));
-    const chapter = endBlend > .35 ? '04 — Grow together' : departure > .3 ? '03 — At our core' : workBlend > .65 ? '02 — The branches' : '01 — Take root';
+    const chapter = endBlend > .35 ? '04 — Grow together' : departure > .3 ? '03 — At our core' : workBlend > .65 ? '02 — Ideas, made real' : '01 — Take root';
     if (chapter !== lastChapter) { $('#scene-name').textContent = chapter; lastChapter = chapter; }
 
-    // The camera pushes into the crown, orbits, then settles between the work.
+    // The camera follows the tree into its reserved gallery space.
     const push = motion && !mobile ? Math.sin(travel * Math.PI) * .32 * (1 - workBlend) : 0;
     const baseSize = mobile ? Math.min(metrics.treeWidth * .32, metrics.treeHeight / 3.8) : Math.min(width * .2, height * .225);
-    const workSize = Math.min(width * (mobile ? .25 : .225), height * .255);
+    galleryTreeRect = workTree.getBoundingClientRect();
+    const workSize = metrics.workTreeSize;
+    const cinematic = document.documentElement.classList.contains('cinematic-work');
+    if (cinematic) {
+      // Crossfade both projects together over a short scroll interval.
+      // The branch switches as soon as the incoming project starts appearing.
+      const timeline = clamp((y - metrics.workTop) / metrics.workTravel) * projectPanels.length;
+      const chapter = Math.min(projectPanels.length - 1, Math.floor(timeline));
+      const fraction = timeline % 1;
+      const finalChapter = chapter === projectPanels.length - 1;
+      const incoming = finalChapter ? 0 : smooth((fraction - .55) / .2);
+      const outgoing = 1 - incoming;
+      const current = incoming > 0 ? chapter + 1 : outgoing > 0 ? chapter : activeProject;
+      projectPanels.forEach((panel, index) => {
+        const opacity = index === chapter ? outgoing : index === chapter + 1 ? incoming : 0;
+        panel.style.setProperty('--project-opacity', opacity.toFixed(4));
+        panel.classList.toggle('is-current', index === current && opacity > 0);
+        panel.inert = index !== current || opacity < .05;
+        panel.setAttribute('aria-hidden', index !== current || opacity < .05);
+      });
+      if (current !== activeProject) setActiveProject(current);
+    } else {
+      const browser = $('.work-browser');
+      const stacked = width <= 900;
+      const pinnedBrowser = getComputedStyle(browser).position === 'sticky';
+      const readingLine = stacked && pinnedBrowser
+        ? metrics.headerHeight + browser.offsetHeight + (height - metrics.headerHeight - browser.offsetHeight) * .4
+        : height * .5;
+      let current = 0;
+      projectPanels.forEach((panel, index) => {
+        const rect = panel.getBoundingClientRect();
+        if (rect.top <= readingLine) current = index;
+        const progress = motion ? smooth((height - rect.top) / (height * .55)) : 1;
+        panel.style.setProperty('--project-enter', (1 - progress).toFixed(3));
+        panel.inert = false;
+        panel.removeAttribute('aria-hidden');
+      });
+      if (current !== activeProject) setActiveProject(current);
+    }
     // Keep a complete tree beside the about copy, or behind it on stacked layouts.
     const stackedAbout = mobile || width <= 900;
     const aboutSize = Math.max(12, Math.min(width * (stackedAbout ? .235 : .095), height * .18,
@@ -391,37 +498,17 @@
     const endSize = Math.max(12, Math.min(width * (mobile ? .235 : .16), height * .2,
       (endFloor - metrics.headerHeight - 24) / 4));
     camera = {
-      x: mix(mix(mix(mobile ? metrics.treeX : width * .715, width * (mobile ? .075 : .5), workBlend), aboutX, departure),
+      x: mix(mix(mix(mobile ? metrics.treeX : width * .715, galleryTreeRect.left + galleryTreeRect.width / 2, workBlend), aboutX, departure),
         width - sceneMargin - endSize * 1.6, endBlend),
-      y: mix(mix(mix(mobile ? metrics.treeTop + metrics.treeHeight * .54 - y : height * .53, height * .52, workBlend), aboutY, departure),
+      y: mix(mix(mix(mobile ? metrics.treeTop + metrics.treeHeight * .54 - y : height * .53, galleryTreeRect.top + galleryTreeRect.height * .49, workBlend), aboutY, departure),
         endFloor - endSize * 1.8, endBlend),
       scale: mix(mix(mix(baseSize * (1 + push), workSize, workBlend), aboutSize, departure), endSize, endBlend),
-      yaw: -.3 + (motion ? Math.sin(elapsed * .17) * .24 + travel * .72 + workBlend * .34 + easedPointer.x * .32 : .2),
-      pitch: -.06 + (motion ? easedPointer.y * .13 + push * .26 : 0),
+      yaw: -.3 + treeRotation * workBlend * (1 - departure) + (motion ? Math.sin(elapsed * .17) * .24 + travel * .72 + workBlend * .34 + easedPointer.x * .32 : .2),
+      pitch: -.06 + treePitch * workBlend * (1 - departure) + (motion ? easedPointer.y * .13 + push * .26 : 0),
       alpha: mix(1, .85, departure)
     };
     camera.cy = Math.cos(camera.yaw); camera.sy = Math.sin(camera.yaw);
     camera.cp = Math.cos(camera.pitch); camera.sp = Math.sin(camera.pitch);
-
-    cardTargets = [];
-    let nearest = -1;
-    let distance = Infinity;
-    cards.forEach(card => {
-      if (card.hidden) return;
-      const node = card.querySelector('.branch-node').getBoundingClientRect();
-      const cy = node.top + node.height / 2;
-      // Only visible attachment points can activate a project connection.
-      // The old overscan kept routes alive above and below the project items.
-      if (cy < metrics.headerHeight || cy > height) return;
-      const id = Number(card.dataset.project);
-      cardTargets.push({ id, x: node.left + node.width / 2, y: cy, side: mobile || card.dataset.side === 'right' ? 1 : -1 });
-      if (Math.abs(cy - height * .52) < distance) { distance = Math.abs(cy - height * .52); nearest = id; }
-    });
-    const nextActive = cardTargets.some(target => target.id === highlighted) ? highlighted : nearest;
-    if (nextActive !== activeProject) {
-      activeProject = nextActive;
-      cards.forEach(card => card.classList.toggle('is-active', Number(card.dataset.project) === activeProject));
-    }
   }
 
   function project(position, sway = 0) {
@@ -459,52 +546,42 @@
     if (workBlend < .02 || departure > .98) return;
     context.lineCap = 'round';
     context.lineJoin = 'round';
-    // Only the active project has a visible route through the tree.
-    const targets = cardTargets.filter(target => target.id === activeProject);
-    targets.forEach(target => {
-      const rootPath = projectedPath(roots[(target.id * 2 + 1) % roots.length]).reverse();
-      const trunkPart = Array.from({ length: 27 }, (_, index) => project(curve(trunk, index / 26 * (.4 + target.id * .09))));
-      const limb = projectedPath(primaryLimbs[target.id]);
-      const tip = limb[limb.length - 1];
-      const branch = [tip, { x: tip.x + target.side * width * .07, y: tip.y }, { x: target.x - target.side * width * .065, y: target.y }, target];
-      const extension = Array.from({ length: 34 }, (_, index) => {
-        const t = index / 33, u = 1 - t;
-        return { x: u*u*u*branch[0].x + 3*u*u*t*branch[1].x + 3*u*t*t*branch[2].x + t*t*t*branch[3].x,
-          y: u*u*u*branch[0].y + 3*u*u*t*branch[1].y + 3*u*t*t*branch[2].y + t*t*t*branch[3].y };
-      });
-      const points = [...rootPath, ...trunkPart, ...limb, ...extension];
-      // A steady foreground stroke stays readable over cards and the vignette;
-      // the travelling pulse is an accent, never the only visible connection.
-      const opacity = workBlend * (1 - departure) * .9;
-      trace(points, context);
-      // A narrow dark edge also preserves contrast across light project artwork.
-      context.globalAlpha = opacity * .65;
-      context.strokeStyle = '#081a16';
-      context.lineWidth = 3.5;
-      context.stroke();
-      context.globalAlpha = opacity;
-      context.strokeStyle = '#91f5d8';
-      context.lineWidth = 1.35;
-      context.shadowBlur = 12;
-      context.shadowColor = '#61f5ce';
-      context.stroke();
-      context.globalAlpha = opacity * .11;
-      context.lineWidth = 7;
-      context.stroke();
-      if (motion) {
-        const progress = (elapsed * .21 + target.id * .19) % 1;
-        // A short trail makes the direction from roots to project legible.
-        for (let tail = 9; tail >= 0; tail--) {
-          const position = pointAlong(points, ((progress - tail * .006) % 1 + 1) % 1);
-          context.globalAlpha = opacity * (1 - tail / 10);
-          context.beginPath();
-          context.arc(position.x, position.y, tail ? 1.35 : 2.7, 0, Math.PI * 2);
-          context.fillStyle = '#e1fff5';
-          context.fill();
-        }
+    // Selecting a project illuminates its own root-to-branch path.
+    const rootPath = projectedPath(roots[(activeProject * 2 + 1) % roots.length]).reverse();
+    const trunkPart = Array.from({ length: 27 }, (_, index) => project(curve(trunk, index / 26 * (.4 + activeProject * .09))));
+    const limb = projectedPath(primaryLimbs[activeProject]);
+    const points = [...rootPath, ...trunkPart, ...limb];
+    // A steady stroke makes the selected branch clear, even with motion off;
+    // the travelling pulse is an accent, never the only visible connection.
+    const opacity = workBlend * (1 - departure) * .9;
+    trace(points, context);
+    // A narrow dark edge separates the path from the leaves.
+    context.globalAlpha = opacity * .65;
+    context.strokeStyle = '#081a16';
+    context.lineWidth = 3.5;
+    context.stroke();
+    context.globalAlpha = opacity;
+    context.strokeStyle = branchColor;
+    context.lineWidth = 1.35;
+    context.shadowBlur = 12;
+    context.shadowColor = branchColor;
+    context.stroke();
+    context.globalAlpha = opacity * .11;
+    context.lineWidth = 7;
+    context.stroke();
+    if (motion) {
+      const progress = (elapsed * .21 + activeProject * .19) % 1;
+      // A short trail makes the direction from roots to project legible.
+      for (let tail = 9; tail >= 0; tail--) {
+        const position = pointAlong(points, ((progress - tail * .006) % 1 + 1) % 1);
+        context.globalAlpha = opacity * (1 - tail / 10);
+        context.beginPath();
+        context.arc(position.x, position.y, tail ? 1.35 : 2.7, 0, Math.PI * 2);
+        context.fillStyle = '#e1fff5';
+        context.fill();
       }
-      context.shadowBlur = 0;
-    });
+    }
+    context.shadowBlur = 0;
     context.globalAlpha = 1;
   }
 
@@ -605,11 +682,27 @@
     });
     context.globalAlpha = 1;
     drawConnections();
+    // Reuse the rendered particles in the pinned gallery viewport. This keeps
+    // the tree above scrolling posters without drawing the particle system twice.
+    if (workTreeContext && galleryTreeRect) {
+      workTreeContext.clearRect(0, 0, workTree.clientWidth, workTree.clientHeight);
+      if (galleryAlpha > 0) {
+        workTreeContext.globalAlpha = galleryAlpha;
+        for (const source of [canvas, connectionCanvas]) {
+          workTreeContext.drawImage(source,
+            galleryTreeRect.left * canvasRatio, galleryTreeRect.top * canvasRatio,
+            galleryTreeRect.width * canvasRatio, galleryTreeRect.height * canvasRatio,
+            0, 0, galleryTreeRect.width, galleryTreeRect.height);
+        }
+        workTreeContext.globalAlpha = 1;
+      }
+    }
   }
 
   function setMotion(enabled) {
     motion = enabled;
     document.documentElement.classList.toggle('motion-enabled', enabled);
+    document.documentElement.classList.toggle('cinematic-work', enabled && height > 650);
     document.body.classList.toggle('motion-paused', !enabled);
     $('.motion-toggle').textContent = 'Motion: ' + (enabled ? 'on' : 'off');
     $('.motion-toggle').setAttribute('aria-pressed', !enabled);
@@ -640,10 +733,16 @@
     }
   });
   window.addEventListener('resize', resize);
-  window.addEventListener('scroll', () => { dirty = true; if (!finePointer.matches) highlighted = -1; }, { passive: true });
+  window.addEventListener('scroll', () => { dirty = true; }, { passive: true });
   document.addEventListener('visibilitychange', () => { lastFrame = 0; dirty = true; });
   document.fonts?.ready.then(measure);
   new ResizeObserver(measure).observe(work);
+  new ResizeObserver(() => {
+    workTreeCanvas.width = Math.round(workTree.clientWidth * canvasRatio);
+    workTreeCanvas.height = Math.round(workTree.clientHeight * canvasRatio);
+    workTreeContext?.setTransform(canvasRatio, 0, 0, canvasRatio, 0, 0);
+    measure();
+  }).observe(workTree);
 
   function frame(time) {
     lenis?.raf(time);
