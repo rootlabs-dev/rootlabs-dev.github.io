@@ -94,6 +94,7 @@
     ['overflow', 'position', 'top', 'width'].forEach(property => { document.body.style[property] = ''; });
     window.scrollTo({ top: y, behavior: 'instant' });
     lenis?.start();
+    smoothY = scrollY;
     measure();
   }
   function closeDialog(dialog) { dialog.close(); unlockPage(); }
@@ -324,6 +325,10 @@
   let easedPointer = { x: 0, y: 0 };
   let elapsed = 0;
   let lastFrame = 0;
+  let lastTime = 0;
+  // Smoothed scroll position. The camera follows this instead of raw
+  // scrollY so slow wheel ticks can't make the tree jump in steps.
+  let smoothY = scrollY;
   let camera;
   let workBlend = 0;
   let departure = 0;
@@ -343,12 +348,13 @@
     connectionContext?.setTransform(ratio, 0, 0, ratio, 0, 0);
     filter($('.filter.active').dataset.filter);
     measure();
+    smoothY = scrollY;
     updateScene();
     draw();
   }
 
   function updateScene() {
-    const y = scrollY;
+    const y = smoothY;
     const travel = motion ? clamp(y / metrics.heroTravel) : 0;
     workBlend = smooth((y - metrics.workTop + height) / (height * .92));
     departure = smooth((y - metrics.aboutTop + height * .75) / height);
@@ -589,6 +595,7 @@
     if (!enabled) { lenis?.destroy(); lenis = null; cursor.style.opacity = '0'; }
     if ((menu.open || detail.open) && lenis) lenis.stop();
     measure();
+    smoothY = scrollY;
     updateScene();
     draw();
   }
@@ -618,15 +625,32 @@
 
   function frame(time) {
     lenis?.raf(time);
-    if (!document.hidden && !menu.open && !detail.open && (dirty || motion) && time - lastFrame >= (mobile ? 40 : 30)) {
-      const delta = Math.min((time - lastFrame) / 1000 || .03, .065);
-      if (motion && !menu.open && !detail.open) elapsed += delta;
-      easedPointer.x = mix(easedPointer.x, pointer.x, .06);
-      easedPointer.y = mix(easedPointer.y, pointer.y, .06);
+    if (document.hidden || menu.open || detail.open) { lastTime = time; requestAnimationFrame(frame); return; }
+    const delta = Math.min((time - (lastTime || time - 16)) / 1000 || .016, .065);
+    lastTime = time;
+    // Ease the rendered scroll position toward the real one with a
+    // frame-rate independent damper (~110ms). Small/slow wheel deltas
+    // then move the tree continuously instead of in visible steps.
+    const targetY = scrollY;
+    if (!motion) smoothY = targetY;
+    else if (Math.abs(targetY - smoothY) > height) smoothY = targetY;
+    else if (smoothY !== targetY) {
+      smoothY += (targetY - smoothY) * (1 - Math.exp(-delta / .11));
+      if (Math.abs(targetY - smoothY) < .1) smoothY = targetY;
+    }
+    if (Math.abs(targetY - smoothY) > .1) dirty = true;
+    const settling = dirty || Math.abs(targetY - smoothY) > .1;
+    // While scrolling/setting render every rAF for smooth motion; only
+    // the idle sway stays throttled to save battery.
+    if ((motion || settling) && (settling || time - lastFrame >= (mobile ? 40 : 30))) {
+      if (motion) elapsed += delta;
+      const pointerK = 1 - Math.exp(-delta / .18);
+      easedPointer.x = mix(easedPointer.x, pointer.x, pointerK);
+      easedPointer.y = mix(easedPointer.y, pointer.y, pointerK);
       updateScene();
       draw();
       lastFrame = time;
-      dirty = false;
+      dirty = Math.abs(scrollY - smoothY) > .1;
     }
     requestAnimationFrame(frame);
   }
