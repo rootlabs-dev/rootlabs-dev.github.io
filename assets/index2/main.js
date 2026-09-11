@@ -288,28 +288,33 @@
     }
   });
 
-  // Loose leaf clusters follow the outer twigs and the finer crown branches.
+  // Leaf clusters grow out of the outer twigs and finer crown branches.
+  // Each leaf keeps its twig anchor so a stem can visibly attach it to
+  // real wood instead of floating disconnected in the canopy.
   limbs.forEach((path, limbIndex) => {
-    const leafCount = limbIndex < crownStart ? 42 : 32;
+    // 20% fewer leaves than the original density for a faster frame rate.
+    const leafCount = limbIndex < crownStart ? 34 : 26;
     for (let index = 0; index < leafCount; index++) {
-      const center = curve(path, .65 + random() * .35);
+      const center = curve(path, .72 + random() * .28);
       const azimuth = random() * Math.PI * 2;
       const elevation = random() * 2 - 1;
       const spread = Math.cbrt(random());
       const ring = Math.sqrt(1 - elevation * elevation) * spread;
       const position = [
-        center[0] + Math.cos(azimuth) * ring * .23,
-        center[1] + elevation * spread * .16 - .025,
-        center[2] + Math.sin(azimuth) * ring * .21
+        center[0] + Math.cos(azimuth) * ring * .14,
+        center[1] + elevation * spread * .1 - .02,
+        center[2] + Math.sin(azimuth) * ring * .13
       ];
       const angle = random() * Math.PI * 2;
       const tilt = (random() - .5) * 1.4;
-      const length = .022 + random() * .022;
+      // Leaves run 20% larger than the original size for a fuller canopy.
+      const length = .0264 + random() * .0264;
       // Each leaf has its own plane in 3D, so it turns edge-on as we orbit.
       const axis = [Math.cos(angle) * Math.cos(tilt), Math.sin(angle), Math.cos(angle) * Math.sin(tilt)];
       const across = [-Math.sin(angle) * Math.cos(tilt), Math.cos(angle), -Math.sin(angle) * Math.sin(tilt)];
       particles.push({
-        position, phase: random() * Math.PI * 2, size: 1,
+        position, anchor: center, sun: clamp((.1 - position[1]) / 1.5),
+        phase: random() * Math.PI * 2, size: 1,
         light: .55 + random() * .45, kind: 4,
         tip: axis.map(value => value * length),
         edge: across.map(value => value * length * .55)
@@ -534,6 +539,20 @@
     }
     // Far particles draw first; depth controls brightness, tint and point size.
     visible.sort((a, b) => a.depth - b.depth);
+    // Petioles: one batched pass of short stems attaches every leaf to its
+    // twig, so the canopy reads as growing branches, not floating confetti.
+    context.globalAlpha = .32 * camera.alpha;
+    context.strokeStyle = '#55785f';
+    context.lineWidth = .6;
+    context.beginPath();
+    for (const point of visible) {
+      const stem = point.particle;
+      if (stem.kind !== 4 || !stem.anchor) continue;
+      const base = project(stem.anchor, point.sway);
+      context.moveTo(base.x, base.y);
+      context.lineTo(point.x, point.y);
+    }
+    context.stroke();
     for (const point of visible) {
       const particle = point.particle;
       const depthLight = clamp((point.depth + 1.2) / 2.4);
@@ -548,7 +567,10 @@
         const end = leafPoint(1, 0);
         const left = leafPoint(flutter, 1);
         const right = leafPoint(-flutter, -1);
-        context.fillStyle = depthLight > .65 ? '#b8f2bc' : depthLight > .4 ? '#72cda2' : '#398f83';
+        // Sun-kissed top leaves run yellow-green; shaded depth stays deep teal.
+        context.fillStyle = particle.sun > .82 && depthLight > .45 ? '#c9eaa6'
+          : particle.sun > .6 && depthLight > .45 ? '#a9dfa4'
+          : depthLight > .65 ? '#b8f2bc' : depthLight > .4 ? '#72cda2' : '#398f83';
         context.beginPath();
         context.moveTo(start.x, start.y);
         context.quadraticCurveTo(left.x, left.y, end.x, end.y);
