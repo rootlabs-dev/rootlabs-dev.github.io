@@ -31,6 +31,7 @@
   setInterval(clock, 60000);
 
   const hero = $('.hero');
+  const heroInterlude = $('.hero-interlude');
   const heroTreeSpace = $('.hero-tree-space');
   const phoneLayout = matchMedia('(max-width: 600px), (max-width: 950px) and (max-height: 500px)');
   const heroStage = $('.hero-stage');
@@ -431,11 +432,29 @@
     departure = smooth((y - metrics.aboutTop + height * .75) / height);
     const endStart = metrics.contactTop - height * .7;
     const endBlend = smooth((y - endStart) / Math.max(1, Math.min(height, metrics.end - endStart)));
-    const heroExit = motion ? smooth((travel - (mobile ? .6 : .08)) / (mobile ? .4 : .9)) : 0;
+    const heroExit = motion ? smooth((travel - (mobile ? .6 : .08)) / (mobile ? .4 : .55)) : 0;
     hero.style.opacity = 1 - heroExit;
     hero.style.transform = motion && !mobile ? `translate3d(0,${-heroExit * height * .15}px,0) scale(${1 - heroExit * .08})` : '';
     hero.style.pointerEvents = heroExit > .98 ? 'none' : '';
     hero.inert = heroExit > .98;
+    // Fill the former blank gap: the interlude rises as the hero leaves,
+    // then yields to work. Static layouts are handled by CSS.
+    if (heroInterlude) {
+      if (motion && !mobile) {
+        const interludeIn = smooth((travel - .4) / .3);
+        const interludeOut = 1 - smooth(workBlend * 1.6);
+        const interludeProgress = clamp(interludeIn * interludeOut);
+        heroInterlude.style.opacity = interludeProgress.toFixed(3);
+        heroInterlude.style.transform = `translate3d(0,${(1 - interludeProgress) * 46}px,0)`;
+        heroInterlude.style.pointerEvents = 'none';
+        heroInterlude.inert = interludeProgress < .05;
+      } else {
+        heroInterlude.style.opacity = '';
+        heroInterlude.style.transform = '';
+        heroInterlude.style.pointerEvents = '';
+        heroInterlude.inert = false;
+      }
+    }
     galleryAlpha = workBlend * (1 - departure);
     $('.scene-world').style.opacity = mix(1, .85, departure) * (1 - galleryAlpha);
     connectionCanvas.style.opacity = 1 - galleryAlpha;

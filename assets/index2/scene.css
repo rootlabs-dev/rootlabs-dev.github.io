@@ -14,6 +14,12 @@ main,footer{position:relative;z-index:2}
 .scene-stage{position:relative}
 .hero-stage{height:175svh}
 .hero{position:sticky;top:0;height:100svh;min-height:720px;max-height:none;padding-top:160px;overflow:visible;will-change:transform,opacity}
+/* Fills the scroll gap after the hero exits, before work arrives. */
+.hero-interlude{position:absolute;left:0;right:0;bottom:0;height:75svh;min-height:440px;display:flex;flex-direction:column;justify-content:center;gap:20px;z-index:2;opacity:0;transform:translateY(46px);pointer-events:none;will-change:transform,opacity}
+.hero-interlude-label{margin:0;color:var(--mint)}
+.hero-interlude-copy{margin:0;max-width:18ch;font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,3.6vw,56px);line-height:1.12;letter-spacing:-.04em}
+.hero-interlude-copy em{font-style:normal;color:var(--mint)}
+.hero-interlude-hint{margin:0;color:#6f8d91}
 .hero h1{font-size:clamp(80px,10.5vw,168px);margin-top:65px;max-width:65%;letter-spacing:-.075em}
 .hero h1 span[style]{color:var(--mint)!important}
 .hero-copy{max-width:310px;color:#a4afb8}
@@ -88,6 +94,8 @@ html:not(.motion-enabled) .hero{position:relative}
   .hero h1 { font-size: clamp(48px, 16vw, 72px); line-height: 1; max-width: 100%; margin: 24px 0 18px; }
   .hero-copy { font-size: 14px; line-height: 1.75; max-width: 33ch; margin: 0; }
   .hero-tree-space { display: block; height: clamp(290px, 40svh, 380px); }
+  .hero-interlude{position:relative;height:auto;min-height:0;padding-block:12px 8px;opacity:1;transform:none;pointer-events:auto}
+  .hero-interlude-copy{font-size:clamp(26px,7.4vw,34px);max-width:20ch}
   .hero-bottom { padding: 0; gap: 14px; align-items: center; }
   .hero-bottom .tags { flex: 1; max-width: 290px; gap: 6px; }
   .tag { min-height: 44px; display: inline-flex; align-items: center; padding: 8px 11px; font-size: 9px; letter-spacing: .45px; }
@@ -167,4 +175,6 @@ html:not(.motion-enabled) .hero{position:relative}
 @media (hover: none) {
   .cursor { display: none; }
 }
-@media(prefers-reduced-motion:reduce){.hero-stage{height:auto}.hero{position:relative}.reveal{opacity:1!important;transform:none!important}.scene-readout{display:none}}
+@media(prefers-reduced-motion:reduce){.hero-stage{height:auto}.hero{position:relative}.hero-interlude{position:relative;height:auto;min-height:0;padding-block:65px;opacity:1!important;transform:none!important;pointer-events:auto}.reveal{opacity:1!important;transform:none!important}.scene-readout{display:none}}
+/* Static layouts (mobile / motion off) show the interlude in normal flow. */
+body.motion-paused .hero-interlude,html:not(.motion-enabled) .hero-interlude{position:relative;height:auto;min-height:0;padding-block:70px 30px;opacity:1!important;transform:none!important;pointer-events:auto}
