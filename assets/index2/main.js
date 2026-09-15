@@ -753,7 +753,9 @@
     // frame-rate independent damper (~110ms). Small/slow wheel deltas
     // then move the tree continuously instead of in visible steps.
     const targetY = scrollY;
-    if (!motion) smoothY = targetY;
+    // Phone layouts take the hero out of flow, so the fixed canvas has to
+    // follow the document exactly; easing it made the tree trail the gesture.
+    if (!motion || mobile) smoothY = targetY;
     else if (Math.abs(targetY - smoothY) > height) smoothY = targetY;
     else if (smoothY !== targetY) {
       smoothY += (targetY - smoothY) * (1 - Math.exp(-delta / .11));
