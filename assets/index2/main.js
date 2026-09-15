@@ -313,6 +313,34 @@
   for (let index = 0; index < 210; index++) {
     air.push({ position: [(random() - .5) * 4.7, (random() - .5) * 3.7, (random() - .5) * 3], size: .3 + random() * .8, phase: random() * 6.28 });
   }
+  // Near-field bokeh sits between the lens and the tree, so the scene reads
+  // with a real focal plane instead of one flat sheet of particles.
+  const bokeh = [];
+  for (let index = 0; index < 13; index++) {
+    bokeh.push({
+      position: [(random() - .5) * 5.6, (random() - .5) * 4.4, 1 + random() * 1.15],
+      size: 24 + random() * 52,
+      alpha: .032 + random() * .055,
+      phase: random() * Math.PI * 2,
+      tint: index % 3
+    });
+  }
+  // A pre-rendered sprite keeps the out-of-focus motes cheap to composite.
+  function lensSprite(rgb) {
+    const size = 96;
+    const sheet = document.createElement('canvas');
+    sheet.width = sheet.height = size;
+    const paint = sheet.getContext('2d');
+    const gradient = paint.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    gradient.addColorStop(0, `rgba(${rgb},.9)`);
+    gradient.addColorStop(.42, `rgba(${rgb},.34)`);
+    gradient.addColorStop(.78, `rgba(${rgb},.07)`);
+    gradient.addColorStop(1, `rgba(${rgb},0)`);
+    paint.fillStyle = gradient;
+    paint.fillRect(0, 0, size, size);
+    return sheet;
+  }
+  const lensSprites = ['143,232,206', '230,211,172', '143,166,255'].map(lensSprite);
 
   // Overlapping rings of boughs give the crown the logo's broad, rounded shape.
   // Branches fill the front and back too, so the silhouette stays full in orbit.
@@ -402,6 +430,8 @@
   let galleryTreeRect;
   let galleryAlpha = 0;
   let canvasRatio = 1;
+  let workTimeline = 0;
+  let branchGrow = 1;
 
   function resize() {
     width = innerWidth;
@@ -469,25 +499,52 @@
     galleryTreeRect = workTree.getBoundingClientRect();
     const workSize = metrics.workTreeSize;
     const cinematic = document.documentElement.classList.contains('cinematic-work');
+    // Scroll position through the five project chapters, measured in projects
+    // so one unit is exactly one idea.
+    const timeline = cinematic ? clamp((y - metrics.workTop) / metrics.workTravel) * projectPanels.length : 0;
+    const fraction = timeline % 1;
+    workTimeline = timeline;
     if (cinematic) {
-      // Crossfade both projects together over a short scroll interval.
-      // The branch switches as soon as the incoming project starts appearing.
-      const timeline = clamp((y - metrics.workTop) / metrics.workTravel) * projectPanels.length;
+      // The chapter handoff runs across a fifth of the scroll: one chapter
+      // leaves as the next arrives. The branch switch follows the arrival, so
+      // the highlighted path changes with the panel rather than before it.
       const chapter = Math.min(projectPanels.length - 1, Math.floor(timeline));
-      const fraction = timeline % 1;
       const finalChapter = chapter === projectPanels.length - 1;
-      const incoming = finalChapter ? 0 : smooth((fraction - .55) / .2);
-      const outgoing = 1 - incoming;
+      const entry = clamp((fraction - .55) / .2);
+      // Position follows one clock so both chapters travel together, while two
+      // offset opacity curves make the outgoing clear before the incoming lands.
+      const move = smooth(entry);
+      const incoming = finalChapter ? 0 : smooth(clamp((entry - .12) / .88));
+      const outgoing = 1 - smooth(clamp(entry / .5));
       const current = incoming > 0 ? chapter + 1 : outgoing > 0 ? chapter : activeProject;
       projectPanels.forEach((panel, index) => {
-        const opacity = index === chapter ? outgoing : index === chapter + 1 ? incoming : 0;
+        const leaving = index === chapter;
+        const arriving = index === chapter + 1;
+        const opacity = leaving ? outgoing : arriving ? incoming : 0;
+        // -1 carries the old chapter up and to the left, +1 brings the new one
+        // in from the lower right, so the two are never stacked on each other.
+        const lift = leaving ? -move : arriving ? 1 - move : 0;
+        // Focus tracks travel, not opacity: the leaving chapter racks out while
+        // the arriving one racks in, instead of both blurring at the midpoint.
+        const focus = Math.abs(lift);
         panel.style.setProperty('--project-opacity', opacity.toFixed(4));
+        panel.style.setProperty('--project-lift', lift.toFixed(4));
+        panel.style.setProperty('--project-depth', (-focus).toFixed(4));
+        panel.style.setProperty('--project-blur', (focus * 7).toFixed(2));
+        panel.classList.toggle('is-fading', focus > .06);
         panel.classList.toggle('is-current', index === current && opacity > 0);
         panel.inert = index !== current || opacity < .05;
         panel.setAttribute('aria-hidden', index !== current || opacity < .05);
       });
       if (current !== activeProject) setActiveProject(current);
+      // The highlighted root-to-branch path draws itself in when a chapter
+      // takes over. Branch switches land on a half-integer of the timeline, so
+      // measuring from that half-integer keeps the growth monotonic across the
+      // chapter boundary instead of snapping back at every whole number.
+      const sinceSwitch = (timeline - .55) - Math.floor(timeline - .55);
+      branchGrow = Math.min(smooth(timeline / .4), .3 + .7 * smooth(sinceSwitch / .45));
     } else {
+      branchGrow = 1;
       const browser = $('.work-browser');
       const stacked = width <= 900;
       const pinnedBrowser = getComputedStyle(browser).position === 'sticky';
@@ -516,14 +573,23 @@
     const endFloor = Math.min(height - 24, metrics.footerTop - y - 16);
     const endSize = Math.max(12, Math.min(width * (mobile ? .235 : .16), height * .2,
       (endFloor - metrics.headerHeight - 24) / 4));
+    // The scroll becomes a camera move: one slow revolution around the volume
+    // plus a crane dolly, so each of the five chapters shows the tree from a
+    // new angle. Five chapters of 72 degrees close the circle exactly, which
+    // means the tree returns to its starting orientation after the gallery.
+    const workWeight = workBlend * (1 - departure);
+    const workOrbit = workTimeline * Math.PI * 2 / projectPanels.length;
+    const workDolly = 1 + Math.sin(fraction * Math.PI) * .075;
+    const workLift = Math.sin(timeline * Math.PI * 2) * 9 * workWeight;
+    work.style.setProperty('--work-progress', clamp(timeline / projectPanels.length).toFixed(4));
     camera = {
       x: mix(mix(mix(mobile ? metrics.treeX : width * .715, galleryTreeRect.left + galleryTreeRect.width / 2, workBlend), aboutX, departure),
         width - sceneMargin - endSize * 1.6, endBlend),
-      y: mix(mix(mix(mobile ? metrics.treeTop + metrics.treeHeight * .54 - y : height * .53, galleryTreeRect.top + galleryTreeRect.height * .49, workBlend), aboutY, departure),
+      y: workLift + mix(mix(mix(mobile ? metrics.treeTop + metrics.treeHeight * .54 - y : height * .53, galleryTreeRect.top + galleryTreeRect.height * .49, workBlend), aboutY, departure),
         endFloor - endSize * 1.8, endBlend),
-      scale: mix(mix(mix(baseSize * (1 + push), workSize, workBlend), aboutSize, departure), endSize, endBlend),
-      yaw: -.3 + treeRotation * workBlend * (1 - departure) + (motion ? Math.sin(elapsed * .17) * .24 + travel * .72 + workBlend * .34 + easedPointer.x * .32 : .2),
-      pitch: -.06 + treePitch * workBlend * (1 - departure) + (motion ? easedPointer.y * .13 + push * .26 : 0),
+      scale: mix(mix(mix(baseSize * (1 + push), workSize, workBlend), aboutSize, departure), endSize, endBlend) * mix(1, workDolly, workWeight),
+      yaw: -.3 + (treeRotation + workOrbit) * workBlend + (motion ? Math.sin(elapsed * .17) * .24 + travel * .72 + workBlend * .34 + easedPointer.x * .32 : .2),
+      pitch: -.06 + (treePitch + Math.sin(timeline * 1.3) * .06) * workBlend + (motion ? easedPointer.y * .13 + push * .26 : 0),
       alpha: mix(1, .85, departure)
     };
     camera.cy = Math.cos(camera.yaw); camera.sy = Math.sin(camera.yaw);
@@ -569,7 +635,11 @@
     const rootPath = projectedPath(roots[(activeProject * 2 + 1) % roots.length]).reverse();
     const trunkPart = Array.from({ length: 27 }, (_, index) => project(curve(trunk, index / 26 * (.4 + activeProject * .09))));
     const limb = projectedPath(primaryLimbs[activeProject]);
-    const points = [...rootPath, ...trunkPart, ...limb];
+    // The path draws itself in from the root tip as the chapter settles, so
+    // the connection reads as growth rather than a line that was always there.
+    const whole = [...rootPath, ...trunkPart, ...limb];
+    const points = branchGrow >= .999 ? whole
+      : whole.slice(0, Math.max(2, Math.round(whole.length * branchGrow)));
     // A steady stroke makes the selected branch clear, even with motion off;
     // the travelling pulse is an accent, never the only visible connection.
     const opacity = workBlend * (1 - departure) * .9;
@@ -699,6 +769,20 @@
       context.globalAlpha = .1 + .15 * (motion ? (1 + Math.sin(elapsed * .4 + particle.phase)) / 2 : .5);
       context.beginPath(); context.arc(point.x, point.y, particle.size * point.perspective, 0, Math.PI * 2); context.fill();
     });
+    // Depth of field: soft motes in front of the lens parallax against the
+    // tree, so the silhouette sits between two layers instead of on a backdrop.
+    for (const mote of bokeh) {
+      const position = [...mote.position];
+      if (motion) {
+        position[0] += Math.sin(elapsed * .15 + mote.phase) * .18;
+        position[1] += Math.cos(elapsed * .12 + mote.phase * 1.3) * .13;
+      }
+      const point = project(position);
+      const size = mote.size * point.perspective * (mobile ? .74 : 1);
+      if (point.x < -size || point.x > width + size || point.y < -size || point.y > height + size) continue;
+      context.globalAlpha = mote.alpha * camera.alpha * (motion ? .55 + .45 * Math.sin(elapsed * .45 + mote.phase) : .8);
+      context.drawImage(lensSprites[mote.tint], point.x - size / 2, point.y - size / 2, size, size);
+    }
     context.globalAlpha = 1;
     drawConnections();
     // Reuse the rendered particles in the pinned gallery viewport. This keeps
