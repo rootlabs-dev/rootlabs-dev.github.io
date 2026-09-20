@@ -252,7 +252,30 @@
     [-1.02, -.66, .08], [.98, -.52, .13], [-.78, -1.08, -.25],
     [.74, -1.05, -.22], [.16, -1.35, .18]
   ];
+  // Where in the tree's growth each particle arrives. Roots first, then the trunk
+  // climbs, the limbs reach out, the twigs follow and the canopy unfurls last.
+  // Leaves hang off their own limb's stage, so a canopy fills after its own wood.
+  const growthStages = {
+    0: { base: .30, span: .40 },  // trunk, the shoot rising out of the seed
+    1: { base: .55, span: .30, leaf: { base: .72, span: .28 } },  // limbs + their leaves
+    2: { base: .68, span: .26, leaf: { base: .82, span: .18 } },  // twigs + their leaves
+    3: { base: .00, span: .34 },  // roots, the first thing the seed puts out
+    4: { base: .72, span: .28 }   // fallback for leaves without a limb stage
+  };
+  // How much growth a particle takes to reach full presence, and how much of the
+  // scroll a wood particle takes to travel from the seed out to its place.
+  const growthFade = .1;
+  const growthTravel = .3;
+  // Growth at the very top of the page, where the tree is still just a seed, and
+  // the cluster in the soil that every wood particle unfurls from.
+  const seedGrowth = .1;
+  const seedCentre = [0, .95, 0];
+  const seedRadius = .2;
   function populate(path, count, radius, kind) {
+    const stage = growthStages[kind] || growthStages[1];
+    // Leaves read the stage of the limb they belong to, so the canopy fills in
+    // after its own wood instead of all at once.
+    path.growStage = stage;
     for (let i = 0; i < count; i++) {
       const t = random();
       const center = curve(path, t);
@@ -268,7 +291,17 @@
       const angle = random() * Math.PI * 2;
       const r = radius * (1 - t * .75) * (.45 + random() * .55);
       const position = center.map((value, axis) => value + r * (Math.cos(angle) * normal[axis] + Math.sin(angle) * binormal[axis]));
-      particles.push({ position, phase: random() * Math.PI * 2, size: .45 + random() * .95, light: .4 + random() * .6, kind });
+      const phase = random() * Math.PI * 2;
+      // The particle's own phase also scatters it inside the seed, so the whole
+      // tree starts as one dense cluster without disturbing the seeded shape.
+      const scatter = seedRadius * (.35 + .65 * phase / (Math.PI * 2));
+      particles.push({
+        position, phase, size: .45 + random() * .95, light: .4 + random() * .6, kind,
+        grow: stage.base + t * stage.span,
+        seedX: seedCentre[0] + Math.cos(phase) * scatter,
+        seedY: seedCentre[1] + Math.sin(phase * 1.7) * scatter * .6,
+        seedZ: seedCentre[2] + Math.sin(phase) * scatter
+      });
     }
   }
   populate(trunk, 1200, .085, 0);
@@ -341,6 +374,9 @@
     return sheet;
   }
   const lensSprites = ['143,232,206', '230,211,172', '143,166,255'].map(lensSprite);
+  // One pre-rendered warm sprite carries the "below the surface" soil bloom, so
+  // that moment costs a single composite instead of a fresh gradient per frame.
+  const soilSprite = lensSprite('146,121,99');
 
   // Overlapping rings of boughs give the crown the logo's broad, rounded shape.
   // Branches fill the front and back too, so the silhouette stays full in orbit.
@@ -382,7 +418,9 @@
     // 20% fewer leaves than the original density for a faster frame rate.
     const leafCount = limbIndex < crownStart ? 34 : 26;
     for (let index = 0; index < leafCount; index++) {
-      const center = curve(path, .72 + random() * .28);
+      const along = .72 + random() * .28;
+      const center = curve(path, along);
+      const leafStage = (path.growStage && path.growStage.leaf) || growthStages[4];
       const azimuth = random() * Math.PI * 2;
       const elevation = random() * 2 - 1;
       const spread = Math.cbrt(random());
@@ -403,6 +441,7 @@
         position, anchor: center, sun: clamp((.1 - position[1]) / 1.5),
         phase: random() * Math.PI * 2, size: 1,
         light: .55 + random() * .45, kind: 4,
+        grow: leafStage.base + (along - .72) / .28 * leafStage.span,
         tip: axis.map(value => value * length),
         edge: across.map(value => value * length * .55)
       });
@@ -435,6 +474,12 @@
   let canvasRatio = 1;
   let canvasScaleX = 1;
   let canvasScaleY = 1;
+  let growth = 1;
+  let below = 0;
+  let dotScale = 1;
+  let driftWidth = 0;
+  let driftHeight = 0;
+  let driftFrames = 0;
   let workTimeline = 0;
   let branchGrow = 1;
   // The redraw runs on every scroll frame, so the particle pass reuses its
@@ -509,6 +554,14 @@
     // closed out before the about copy lands; starting it at aboutTop itself
     // left a stretch where the frame had left but the tree had not come back.
     departure = smooth((y - (metrics.aboutTop - height * 1.05)) / (height * .75));
+    // One scroll, one growth: a seed in the soil, then roots, then a sapling,
+    // branches and finally the full canopy as the five projects begin. Every
+    // wood particle travels out of the seed, so nothing is ever half-built in
+    // place. Driven from the document anchors, so it is layout independent.
+    growth = motion ? mix(seedGrowth, 1, smooth(y / Math.max(1, metrics.workTop))) : 1;
+    // "Good software starts below the surface": while the tree is putting out its
+    // roots the ground line is brought up to carry the frame.
+    below = motion ? smooth(clamp(1 - Math.abs(growth - .3) / .2)) : 0;
     const endStart = metrics.contactTop - height * .7;
     const endBlend = smooth((y - endStart) / Math.max(1, Math.min(height, metrics.end - endStart)));
     const heroExit = motion ? smooth((travel - (mobile ? .6 : .08)) / (mobile ? .4 : .55)) : 0;
@@ -545,6 +598,16 @@
     // The camera follows the tree into its reserved gallery space.
     const push = motion && !mobile ? Math.sin(travel * Math.PI) * .32 * (1 - workBlend) : 0;
     const baseSize = mobile ? Math.min(metrics.treeWidth * .32, metrics.treeHeight / 3.8) : Math.min(width * .2, height * .225);
+    // While the tree is still a seed the camera sits close to it and holds the
+    // cluster in frame, then pulls back and re-frames the whole tree as it grows.
+    // Without this the opening would be a speck in an empty frame.
+    const sprouted = smooth(clamp(growth / .45));
+    const heroScale = baseSize * mix(2.4, 1, sprouted);
+    const heroLift = seedCentre[1] * (1 - sprouted) * heroScale;
+    // The camera close-up alone would still leave the seed as sub-pixel dust, so
+    // the grains are drawn larger while the tree is a cluster and settle to their
+    // true size as it grows.
+    dotScale = mix(1.9, 1, sprouted);
     const workSize = metrics.workTreeSize;
     const cinematic = document.documentElement.classList.contains('cinematic-work');
     // Scroll position through the five project chapters, measured in projects
@@ -635,15 +698,15 @@
     // On phones the tree sits in normal page flow, so scrolling the hero away
     // would clip its crown against the top of the frame. It is held just inside
     // the frame instead, and the gallery handoff carries it on from there.
-    const heroTreeY = mobile
+    const heroTreeY = (mobile
       ? Math.max(metrics.treeTop + metrics.treeHeight * .54 - y, baseSize * 1.9 + 12)
-      : height * .53;
+      : height * .53) - heroLift;
     camera = {
       x: mix(mix(mix(mobile ? metrics.treeX : width * .715, galleryTreeRect.left + galleryTreeRect.width / 2, workBlend), aboutX, departure),
         width - sceneMargin - endSize * 1.6, endBlend),
       y: workLift + mix(mix(mix(heroTreeY, galleryTreeRect.top + galleryTreeRect.height * .49, workBlend), aboutY, departure),
         endFloor - endSize * 1.8, endBlend),
-      scale: mix(mix(mix(baseSize * (1 + push), workSize, workBlend), aboutSize, departure), endSize, endBlend) * mix(1, workDolly, workWeight),
+      scale: mix(mix(mix(heroScale * (1 + push), workSize, workBlend), aboutSize, departure), endSize, endBlend) * mix(1, workDolly, workWeight),
       yaw: -.3 + (treeRotation + workOrbit) * workBlend + (motion ? Math.sin(elapsed * .17) * .24 + travel * .72 + workBlend * .34 + easedPointer.x * .32 : .2),
       pitch: -.06 + (treePitch + Math.sin(timeline * 1.3) * .06) * workBlend + (motion ? easedPointer.y * .13 + push * .26 : 0),
       alpha: mix(1, .85, departure)
@@ -741,24 +804,45 @@
     // painting; a full-viewport fill was wasted work on every scroll frame.
     context.fillStyle = glow;
     context.fillRect(camera.x - glowRadius, camera.y - glowRadius, glowRadius * 2, glowRadius * 2);
+    if (growth < .5) {
+      // A halo keeps the seed reading as something luminous rather than a stray
+      // dot, and fades out as the tree takes the frame over.
+      const seedPoint = project(seedCentre);
+      const halo = camera.scale * .34;
+      context.globalAlpha = (1 - clamp(growth / .5)) * .3 * camera.alpha;
+      context.drawImage(lensSprites[0], seedPoint.x - halo, seedPoint.y - halo, halo * 2, halo * 2);
+    }
 
-    // Ground ellipse and its far rim anchor the roots in space.
-    context.globalAlpha = .24 * camera.alpha;
-    context.strokeStyle = '#467d78'; context.lineWidth = .6;
+    // Ground ellipse and its far rim anchor the roots in space. While the story
+    // is still below the surface the line brightens and thickens to carry the
+    // frame, then settles back as the canopy takes over.
+    context.globalAlpha = (.24 + below * .34) * camera.alpha;
+    context.strokeStyle = '#467d78'; context.lineWidth = .6 + below * .9;
     const ground = Array.from({ length: 81 }, (_, index) => {
       const angle = index / 80 * Math.PI * 2;
       return project([Math.cos(angle) * 1.02, 1.3, Math.sin(angle) * 1.02]);
     });
     trace(ground); context.stroke();
-    context.globalAlpha = .12 * camera.alpha;
-    context.strokeStyle = '#927963';
+    if (below > .01) {
+      // A warm bloom under the line reads as soil, so the moment lands as "below
+      // the surface" rather than just a brighter ring.
+      const soilSize = camera.scale * 3;
+      context.globalAlpha = .24 * below * camera.alpha;
+      context.drawImage(soilSprite, camera.x - soilSize / 2,
+        camera.y + camera.scale * .95 - soilSize / 2, soilSize, soilSize);
+    }
     // The faint wood wireframe is a desktop flourish. On a phone the particle
     // wood already carries the silhouette, so only the trunk, main limbs and
-    // roots are stroked instead of every twig and rootlet.
-    if (mobile) {
-      for (let index = 0; index < mobileSkeleton.length; index++) { trace(projectedPath(mobileSkeleton[index], 18)); context.stroke(); }
-    } else {
-      [trunk, ...limbs, ...roots, ...rootlets].forEach(path => { trace(projectedPath(path, 28)); context.stroke(); });
+    // roots are stroked instead of every twig and rootlet. It fades in with the
+    // wood, so no wireframe shows through while the tree is still a seed.
+    context.globalAlpha = .12 * camera.alpha * clamp((growth - .2) / .35);
+    context.strokeStyle = '#927963';
+    if (growth > .2) {
+      if (mobile) {
+        for (let index = 0; index < mobileSkeleton.length; index++) { trace(projectedPath(mobileSkeleton[index], 18)); context.stroke(); }
+      } else {
+        [trunk, ...limbs, ...roots, ...rootlets].forEach(path => { trace(projectedPath(path, 28)); context.stroke(); });
+      }
     }
 
     let visibleCount = 0;
@@ -767,15 +851,29 @@
       const particle = particles[index];
       // Preserve the canopy on phones while keeping the wood particle budget low.
       if (mobile && index % (particle.kind === 4 ? 2 : 3)) continue;
+      // Growth is resolved before projecting, so the parts of the tree that have
+      // not arrived yet cost nothing to measure or draw either.
+      const appear = clamp((growth - particle.grow) / growthFade);
+      if (appear <= 0) continue;
       const position = particle.position;
-      const sway = motion ? Math.sin(elapsed * .65 + position[1] * 2 + particle.phase * .1) * .012 * Math.max(0, -position[1]) : 0;
-      const projected = projectInto(position[0], position[1], position[2], sway, pointScratch);
+      // Wood unfurls out of the seed: at the moment it arrives a particle is
+      // still inside the cluster, and it settles into place further up the
+      // scroll. Skipped entirely once the tree is grown, which is most of the page.
+      let px = position[0], py = position[1], pz = position[2];
+      if (particle.kind < 4 && growth < 1) {
+        const back = 1 - clamp((growth - particle.grow) / growthTravel);
+        px += (particle.seedX - px) * back;
+        py += (particle.seedY - py) * back;
+        pz += (particle.seedZ - pz) * back;
+      }
+      const sway = motion ? Math.sin(elapsed * .65 + py * 2 + particle.phase * .1) * .012 * Math.max(0, -py) : 0;
+      const projected = projectInto(px, py, pz, sway, pointScratch);
       if (projected.x < -5 || projected.x > width + 5 || projected.y < -5 || projected.y > height + 5) continue;
       let entry = visiblePool[visibleCount];
-      if (!entry) entry = visiblePool[visibleCount] = { x: 0, y: 0, depth: 0, perspective: 0, particle: null, sway: 0, bucket: 0 };
+      if (!entry) entry = visiblePool[visibleCount] = { x: 0, y: 0, depth: 0, perspective: 0, particle: null, sway: 0, bucket: 0, grow: 1 };
       entry.x = projected.x; entry.y = projected.y;
       entry.depth = projected.depth; entry.perspective = projected.perspective;
-      entry.particle = particle; entry.sway = sway;
+      entry.particle = particle; entry.sway = sway; entry.grow = appear;
       entry.bucket = clamp((projected.depth + 6) * (depthBuckets / 12) | 0, 0, depthBuckets - 1);
       depthCounts[entry.bucket + 1]++;
       visiblePool[visibleCount++] = entry;
@@ -795,7 +893,7 @@
     for (let index = 0; index < visibleCount; index++) {
       const point = ordered[index];
       const stem = point.particle;
-      if (stem.kind !== 4 || !stem.anchor) continue;
+      if (stem.kind !== 4 || !stem.anchor || point.grow < .4) continue;
       const base = projectInto(stem.anchor[0], stem.anchor[1], stem.anchor[2], point.sway, pointScratch);
       context.moveTo(base.x, base.y);
       context.lineTo(point.x, point.y);
@@ -806,18 +904,21 @@
       const particle = point.particle;
       const depthLight = clamp((point.depth + 1.2) / 2.4);
       const flicker = motion ? .85 + .15 * Math.sin(elapsed * 1.3 + particle.phase) : 1;
-      context.globalAlpha = (.18 + depthLight * .72) * particle.light * flicker * camera.alpha;
+      context.globalAlpha = (.18 + depthLight * .72) * particle.light * flicker * camera.alpha * (.4 + .6 * point.grow);
       if (particle.kind === 4) {
         const flutter = motion ? Math.sin(elapsed * 1.1 + particle.phase) * .22 : 0;
         const body = particle.position, tip = particle.tip, edge = particle.edge;
-        // Each blade corner is projected straight from scalars, so a canopy of
-        // thousands of leaves no longer allocates four arrays per leaf.
-        projectInto(body[0] - tip[0], body[1] - tip[1], body[2] - tip[2], point.sway, leafStart);
-        projectInto(body[0] + tip[0], body[1] + tip[1], body[2] + tip[2], point.sway, leafEnd);
-        projectInto(body[0] + tip[0] * flutter + edge[0], body[1] + tip[1] * flutter + edge[1],
-          body[2] + tip[2] * flutter + edge[2], point.sway, leafLeft);
-        projectInto(body[0] - tip[0] * flutter - edge[0], body[1] - tip[1] * flutter - edge[1],
-          body[2] - tip[2] * flutter - edge[2], point.sway, leafRight);
+        // A leaf scales out of its own stem, so growth reads as unfurling rather
+        // than a canopy switching on. Corners are projected straight from scalars,
+        // so thousands of leaves still allocate nothing per frame.
+        const unfurl = point.grow;
+        const flutterX = (tip[0] * flutter + edge[0]) * unfurl;
+        const flutterY = (tip[1] * flutter + edge[1]) * unfurl;
+        const flutterZ = (tip[2] * flutter + edge[2]) * unfurl;
+        projectInto(body[0] - tip[0] * unfurl, body[1] - tip[1] * unfurl, body[2] - tip[2] * unfurl, point.sway, leafStart);
+        projectInto(body[0] + tip[0] * unfurl, body[1] + tip[1] * unfurl, body[2] + tip[2] * unfurl, point.sway, leafEnd);
+        projectInto(body[0] + flutterX, body[1] + flutterY, body[2] + flutterZ, point.sway, leafLeft);
+        projectInto(body[0] - flutterX, body[1] - flutterY, body[2] - flutterZ, point.sway, leafRight);
         // Sun-kissed top leaves run yellow-green; shaded depth stays deep teal.
         context.fillStyle = particle.sun > .82 && depthLight > .45 ? '#c9eaa6'
           : particle.sun > .6 && depthLight > .45 ? '#a9dfa4'
@@ -839,7 +940,7 @@
         continue;
       }
       context.fillStyle = depthLight > .65 ? '#dcc5a7' : depthLight > .4 ? '#b09376' : '#786b60';
-      const radius = Math.max(.45, particle.size * point.perspective * camera.scale / 230);
+      const radius = Math.max(.45, particle.size * point.perspective * camera.scale / 230 * (.45 + .55 * point.grow) * dotScale);
       context.beginPath(); context.arc(point.x, point.y, radius, 0, Math.PI * 2); context.fill();
       if (particle.light > .985) {
         context.globalAlpha *= .13;
@@ -948,9 +1049,16 @@
   function frame(time) {
     lenis?.raf(time);
     if (document.hidden || menu.open || detail.open) { lastTime = time; requestAnimationFrame(frame); return; }
-    // Phone browsers can settle their layout viewport after load without firing a
-    // resize, which would leave the canvas sized for the wrong viewport.
-    if (innerWidth !== width || innerHeight !== height) resize();
+    // Phone browsers settle their layout viewport after load, and the scrolling
+    // toolbar toggles it while scrolling, without always firing a resize. Only a
+    // size that holds still for two frames is treated as real: an oscillating
+    // viewport would otherwise re-measure on nearly every scrolling frame, which
+    // costs far more than the drift it corrects. The gallery blit derives its
+    // scale from the live canvas box, so a stale size can never misplace it.
+    if (innerWidth === width && innerHeight === height) driftFrames = 0;
+    else if (innerWidth === driftWidth && innerHeight === driftHeight) {
+      if (++driftFrames >= 2) { driftFrames = 0; resize(); }
+    } else { driftWidth = innerWidth; driftHeight = innerHeight; driftFrames = 0; }
     const delta = Math.min((time - (lastTime || time - 16)) / 1000 || .016, .065);
     lastTime = time;
     // Ease the rendered scroll position toward the real one with a
