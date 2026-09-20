@@ -433,6 +433,8 @@
   let galleryTreeRect;
   let galleryAlpha = 0;
   let canvasRatio = 1;
+  let canvasScaleX = 1;
+  let canvasScaleY = 1;
   let workTimeline = 0;
   let branchGrow = 1;
   // The redraw runs on every scroll frame, so the particle pass reuses its
@@ -493,6 +495,13 @@
     // Read the gallery box before writing any styles, so the frame pays for one
     // layout pass instead of a forced reflow in the middle of its updates.
     galleryTreeRect = workTree.getBoundingClientRect();
+    // The gallery blit maps viewport pixels onto the canvas backing store, so it
+    // needs the canvas's real on-screen box. Sizing is driven by the nominal
+    // ratio, which drifts from the CSS box whenever a phone settles its layout
+    // viewport late or the page is scaled.
+    const canvasBox = canvas.getBoundingClientRect();
+    canvasScaleX = canvas.width / (canvasBox.width || 1);
+    canvasScaleY = canvas.height / (canvasBox.height || 1);
     const travel = motion ? clamp(y / metrics.heroTravel) : 0;
     workBlend = smooth((y - metrics.workTop + height) / (height * .92));
     // The tree only lives in the pinned gallery frame until that frame scrolls
@@ -623,10 +632,16 @@
     const workDolly = 1 + Math.sin(fraction * Math.PI) * .075;
     const workLift = Math.sin(timeline * Math.PI * 2) * 9 * workWeight;
     work.style.setProperty('--work-progress', clamp(timeline / projectPanels.length).toFixed(4));
+    // On phones the tree sits in normal page flow, so scrolling the hero away
+    // would clip its crown against the top of the frame. It is held just inside
+    // the frame instead, and the gallery handoff carries it on from there.
+    const heroTreeY = mobile
+      ? Math.max(metrics.treeTop + metrics.treeHeight * .54 - y, baseSize * 1.9 + 12)
+      : height * .53;
     camera = {
       x: mix(mix(mix(mobile ? metrics.treeX : width * .715, galleryTreeRect.left + galleryTreeRect.width / 2, workBlend), aboutX, departure),
         width - sceneMargin - endSize * 1.6, endBlend),
-      y: workLift + mix(mix(mix(mobile ? metrics.treeTop + metrics.treeHeight * .54 - y : height * .53, galleryTreeRect.top + galleryTreeRect.height * .49, workBlend), aboutY, departure),
+      y: workLift + mix(mix(mix(heroTreeY, galleryTreeRect.top + galleryTreeRect.height * .49, workBlend), aboutY, departure),
         endFloor - endSize * 1.8, endBlend),
       scale: mix(mix(mix(baseSize * (1 + push), workSize, workBlend), aboutSize, departure), endSize, endBlend) * mix(1, workDolly, workWeight),
       yaw: -.3 + (treeRotation + workOrbit) * workBlend + (motion ? Math.sin(elapsed * .17) * .24 + travel * .72 + workBlend * .34 + easedPointer.x * .32 : .2),
@@ -859,17 +874,26 @@
       workTreeContext.clearRect(0, 0, workTree.clientWidth, workTree.clientHeight);
       if (galleryAlpha > 0) {
         workTreeContext.globalAlpha = galleryAlpha;
-        workTreeContext.drawImage(canvas,
-          galleryTreeRect.left * canvasRatio, galleryTreeRect.top * canvasRatio,
-          galleryTreeRect.width * canvasRatio, galleryTreeRect.height * canvasRatio,
-          0, 0, galleryTreeRect.width, galleryTreeRect.height);
+        // Copy the frame's slice of the scene, snapped to whole device pixels and
+        // with the destination compensated by the same fraction, so the copy lands
+        // exactly on the pixels it came from. A fractional source rect makes the
+        // browser resample, and that half-pixel shift ghosts the fine trunk and
+        // connection strokes into a visible second line while the two overlap.
+        const sourceX = galleryTreeRect.left * canvasScaleX;
+        const sourceY = galleryTreeRect.top * canvasScaleY;
+        const px = Math.round(sourceX);
+        const py = Math.round(sourceY);
+        const pw = Math.max(1, Math.round(galleryTreeRect.width * canvasScaleX));
+        const ph = Math.max(1, Math.round(galleryTreeRect.height * canvasScaleY));
+        const dx = (px - sourceX) / canvasScaleX;
+        const dy = (py - sourceY) / canvasScaleY;
+        const dw = pw / canvasScaleX;
+        const dh = ph / canvasScaleY;
+        workTreeContext.drawImage(canvas, px, py, pw, ph, dx, dy, dw, dh);
         // The separate connection overlay is empty most of the frame, so it is
         // only composited when it actually drew something.
         if (connectionsDrawn) {
-          workTreeContext.drawImage(connectionCanvas,
-            galleryTreeRect.left * canvasRatio, galleryTreeRect.top * canvasRatio,
-            galleryTreeRect.width * canvasRatio, galleryTreeRect.height * canvasRatio,
-            0, 0, galleryTreeRect.width, galleryTreeRect.height);
+          workTreeContext.drawImage(connectionCanvas, px, py, pw, ph, dx, dy, dw, dh);
         }
         workTreeContext.globalAlpha = 1;
       }
@@ -924,6 +948,9 @@
   function frame(time) {
     lenis?.raf(time);
     if (document.hidden || menu.open || detail.open) { lastTime = time; requestAnimationFrame(frame); return; }
+    // Phone browsers can settle their layout viewport after load without firing a
+    // resize, which would leave the canvas sized for the wrong viewport.
+    if (innerWidth !== width || innerHeight !== height) resize();
     const delta = Math.min((time - (lastTime || time - 16)) / 1000 || .016, .065);
     lastTime = time;
     // Ease the rendered scroll position toward the real one with a
