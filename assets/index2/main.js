@@ -495,7 +495,11 @@
     galleryTreeRect = workTree.getBoundingClientRect();
     const travel = motion ? clamp(y / metrics.heroTravel) : 0;
     workBlend = smooth((y - metrics.workTop + height) / (height * .92));
-    departure = smooth((y - metrics.aboutTop + height * .75) / height);
+    // The tree only lives in the pinned gallery frame until that frame scrolls
+    // off, which happens at aboutTop - height. The handoff is anchored there and
+    // closed out before the about copy lands; starting it at aboutTop itself
+    // left a stretch where the frame had left but the tree had not come back.
+    departure = smooth((y - (metrics.aboutTop - height * 1.05)) / (height * .75));
     const endStart = metrics.contactTop - height * .7;
     const endBlend = smooth((y - endStart) / Math.max(1, Math.min(height, metrics.end - endStart)));
     const heroExit = motion ? smooth((travel - (mobile ? .6 : .08)) / (mobile ? .4 : .55)) : 0;
