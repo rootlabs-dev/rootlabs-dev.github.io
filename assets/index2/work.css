@@ -55,7 +55,23 @@
 
 /* The tree stays centered while only the project copy and artwork fade. */
 .cinematic-work .work-stage { height: 550svh; }
-.cinematic-work #work { position: sticky; top: 0; height: 100svh; padding-top: clamp(110px, 13svh, 145px); padding-bottom: 24px; }
+/* Chapters travel in from the lower right and the caption card bleeds past the
+   frame's gutters, so the section deliberately overflows. Clipping on the x
+   axis alone keeps that travel off the page's scroll width while the chapters
+   still climb in from below the frame. */
+.cinematic-work #work { position: sticky; top: 0; height: 100svh; padding-top: clamp(110px, 13svh, 145px); padding-bottom: 24px; overflow-x: clip; }
+/* Everything pinned to the frame's lower edge measures from --screen-floor
+   rather than from the frame itself, so a bottom-anchored control lands on the
+   screen's bottom instead of floating above it. Two things separate the two
+   edges: the home indicator area, and the browser chrome hiding on scroll,
+   which grows the visual viewport past 100svh. The frame itself stays a stable
+   100svh rather than following 100dvh, because resizing it on every tick of
+   that animation would drag the tree's box with it and re-rasterise the
+   particle canvas mid-gesture; the offset carries the difference instead. */
+.cinematic-work #work { --screen-floor: 0px; }
+@supports (height: 100dvh) {
+  .cinematic-work #work { --screen-floor: calc(env(safe-area-inset-bottom) + 100svh - 100dvh); }
+}
 .cinematic-work .work-heading { position: relative; z-index: 5; margin-bottom: 0; pointer-events: none; }
 .cinematic-work .section-label { position: relative; z-index: 5; }
 .cinematic-work .work-browser { display: contents; }
@@ -80,8 +96,8 @@
 .cinematic-work .project-panel.is-current .project-detail { pointer-events: auto; }
 .cinematic-work .project-story { position: absolute; left: 5%; top: 52%; width: 25%; transform: translateY(-34%); }
 .cinematic-work .project-art { position: absolute; right: 5%; top: 52%; width: 23%; padding: 15px 0; transform: translateY(-40%); }
-.cinematic-work .work-choices { position: absolute; z-index: 5; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 0; }
-.cinematic-work .gallery-navigation { position: absolute; bottom: 24px; left: 5%; right: 5%; width: auto; padding: 0; }
+.cinematic-work .work-choices { position: absolute; z-index: 5; bottom: calc(24px + var(--screen-floor)); left: 50%; transform: translateX(-50%); padding: 0; }
+.cinematic-work .gallery-navigation { position: absolute; bottom: calc(24px + var(--screen-floor)); left: 5%; right: 5%; width: auto; padding: 0; }
 .cinematic-work .gallery-controls { margin-left: auto; }
 .cinematic-work .work-outro { display: none; }
 /* The title drifts back into depth as the camera moves forward through it. */
@@ -89,7 +105,7 @@
 .cinematic-work .work-heading > p { opacity: calc(1 - var(--work-progress, 0) * .85); }
 /* A hairline film rail scrubs with the scroll, so the section reads as a reel.
    It lives on the gallery so it can inherit the current project's accent. */
-.cinematic-work .project-gallery:before, .cinematic-work .project-gallery:after { content: ''; position: absolute; bottom: 8px; height: 1px; pointer-events: none; }
+.cinematic-work .project-gallery:before, .cinematic-work .project-gallery:after { content: ''; position: absolute; bottom: calc(8px + var(--screen-floor)); height: 1px; pointer-events: none; }
 .cinematic-work .project-gallery:before { left: 5%; right: 5%; background: #ffffff14; }
 .cinematic-work .project-gallery:after {
   left: 5%; width: calc(90% * var(--work-progress, 0));
@@ -137,7 +153,7 @@
   .cinematic-work .tree-caption { bottom: 2px; font-size: 7px; }
   /* Copy rides a scrimmed caption card, so it never fights the canopy. */
   .cinematic-work .project-story {
-    top: auto; bottom: 74px; left: -6%; right: -6%; width: auto; transform: none;
+    top: auto; bottom: calc(86px + var(--screen-floor)); left: -6%; right: -6%; width: auto; transform: none;
     padding: 40px 12% 0;
     background: linear-gradient(180deg, #080b1000, #080b10f2 34px, #080b10f7);
   }
@@ -146,12 +162,16 @@
   .cinematic-work .project-description { font-size: 12px; line-height: 1.7; max-width: 48ch; margin-bottom: 16px; }
   .cinematic-work .project-detail { gap: 16px; }
   /* A small film still tucked over the frame edge, like a print on a lightbox. */
-  .cinematic-work .project-art { right: 6%; top: auto; bottom: 262px; width: 84px; padding: 0; transform: none; }
+  .cinematic-work .project-art { right: 6%; top: auto; bottom: calc(274px + var(--screen-floor)); width: 84px; padding: 0; transform: none; }
   .cinematic-work .project-art-frame { padding: 7px; border-radius: 3px; box-shadow: 8px 16px 38px #0009; }
   .cinematic-work .project-logo { margin: 0; }
   .cinematic-work .art-label, .cinematic-work .art-caption { display: none; }
-  .cinematic-work .work-choices { bottom: 22px; gap: 8px; }
-  .cinematic-work .gallery-navigation { top: 118px; bottom: auto; left: auto; right: 6%; width: auto; }
+  /* A phone has no room for the counter beside the dots, so the bar stacks:
+     progress rail, then the counter on it, then the dots, then the copy. The
+     dots sit higher than they once did to open that slot, which is why the
+     caption card and the still move up with them. */
+  .cinematic-work .work-choices { bottom: calc(34px + var(--screen-floor)); gap: 8px; }
+  .cinematic-work .gallery-navigation { top: auto; bottom: calc(16px + var(--screen-floor)); left: 6%; right: 6%; width: auto; }
   .cinematic-work .gallery-hint, .cinematic-work .gallery-step { display: none; }
   .cinematic-work .gallery-pagination { margin: 0; gap: 8px; font-size: 9px; }
   /* A shallower lens makes the same rotation read as real depth on a phone. */
@@ -170,7 +190,7 @@
 @media (min-width: 601px) and (max-width: 900px) {
   .cinematic-work .work-tree { left: 2%; top: 5%; width: 96%; height: 62%; }
   .cinematic-work .project-story {
-    bottom: 104px; left: 5%; right: auto; width: 56%;
+    bottom: calc(104px + var(--screen-floor)); left: 5%; right: auto; width: 56%;
     padding: 0; background: none;
   }
   .cinematic-work .project-category, .cinematic-work .project-story h3 { max-width: 100%; }
@@ -184,12 +204,11 @@
   .project-panel { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .project-art { max-width: 260px; justify-self: center; }
   .cinematic-work #work { padding-top: calc(92px + env(safe-area-inset-top)); }
-  .cinematic-work .gallery-navigation { top: calc(101px + env(safe-area-inset-top)); }
   .cinematic-work .project-description { max-width: 100%; }
-  .cinematic-work .project-story { bottom: calc(74px + env(safe-area-inset-bottom)); }
   /* The film still owns the right of the frame, so the tree caption moves to
-     the lower left rather than sitting underneath it. */
-  .cinematic-work .tree-caption { justify-content: flex-start; padding-left: 6%; }
+     the lower left rather than sitting underneath it, and lifts clear of the
+     caption card the taller bottom bar pushed up. */
+  .cinematic-work .tree-caption { bottom: 10px; justify-content: flex-start; padding-left: 6%; }
   .cinematic-work .project-art { width: 76px; }
 }
 @media (max-width: 380px) {
@@ -197,7 +216,7 @@
   .cinematic-work .project-story h3 { font-size: 25px; margin-bottom: 10px; max-width: calc(100% - 92px); }
   .cinematic-work .project-category { margin-bottom: 8px; max-width: calc(100% - 92px); }
   .cinematic-work .project-description { font-size: 11px; margin-bottom: 12px; }
-  .cinematic-work .project-art { width: 70px; bottom: 248px; }
+  .cinematic-work .project-art { width: 70px; bottom: calc(260px + var(--screen-floor)); }
   .cinematic-work .work-tree { top: 14%; height: 44%; }
 }
 @media (prefers-reduced-motion: reduce) { .project-gallery *, .project-gallery *::before, .project-gallery *::after { transition: none; } }
