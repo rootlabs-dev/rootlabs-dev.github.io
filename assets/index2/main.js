@@ -410,6 +410,9 @@
   });
 
   const canvas = $('#sculpture');
+  // The phone skeleton pass strokes the same paths every frame, so the list is
+  // built once here instead of being spread anew on each draw.
+  const mobileSkeleton = [trunk, ...primaryLimbs, ...roots];
   const context = canvas.getContext('2d', { alpha: true });
   const connectionCanvas = $('#project-connections');
   const connectionContext = connectionCanvas.getContext('2d', { alpha: true });
@@ -432,13 +435,43 @@
   let canvasRatio = 1;
   let workTimeline = 0;
   let branchGrow = 1;
+  // The redraw runs on every scroll frame, so the particle pass reuses its
+  // projection targets and records instead of allocating. Rebuilding thousands
+  // of objects each frame was what let garbage collection stall the tree on a
+  // phone and make it trail the gesture.
+  const pointScratch = { x: 0, y: 0, depth: 0, perspective: 0 };
+  const leafStart = { x: 0, y: 0, depth: 0, perspective: 0 };
+  const leafEnd = { x: 0, y: 0, depth: 0, perspective: 0 };
+  const leafLeft = { x: 0, y: 0, depth: 0, perspective: 0 };
+  const leafRight = { x: 0, y: 0, depth: 0, perspective: 0 };
+  // Depth buckets give the painter's order in linear time. A comparison sort
+  // of several thousand particles was a real slice of every phone frame.
+  const depthBuckets = 128;
+  const depthCounts = new Int32Array(depthBuckets + 1);
+  const visiblePool = [];
+  const ordered = [];
+  // Scalar form of project() that writes into a caller-owned record, so a
+  // canopy of thousands of leaves costs no array or object churn.
+  function projectInto(x, y, z, sway, out) {
+    const rx = (x + sway) * camera.cy + z * camera.sy;
+    const rz = -(x + sway) * camera.sy + z * camera.cy;
+    const ry = y * camera.cp - rz * camera.sp;
+    const depth = y * camera.sp + rz * camera.cp;
+    const perspective = 3.8 / (3.8 - depth);
+    out.x = camera.x + rx * camera.scale * perspective;
+    out.y = camera.y + ry * camera.scale * perspective;
+    out.depth = depth; out.perspective = perspective;
+    return out;
+  }
 
   function resize() {
     width = innerWidth;
     height = innerHeight;
     mobile = phoneLayout.matches;
     document.documentElement.classList.toggle('cinematic-work', motion && height > 650);
-    const ratio = canvasRatio = Math.min(devicePixelRatio || 1, mobile ? 1.5 : 1.75);
+    // Phones rasterise the full-viewport particle canvas on every scroll frame,
+    // so their budget is spent at 1x device pixels; the field is soft anyway.
+    const ratio = canvasRatio = Math.min(devicePixelRatio || 1, mobile ? 1 : 1.75);
     canvas.width = Math.round(width * ratio);
     canvas.height = Math.round(height * ratio);
     context?.setTransform(ratio, 0, 0, ratio, 0, 0);
@@ -457,6 +490,9 @@
 
   function updateScene() {
     const y = smoothY;
+    // Read the gallery box before writing any styles, so the frame pays for one
+    // layout pass instead of a forced reflow in the middle of its updates.
+    galleryTreeRect = workTree.getBoundingClientRect();
     const travel = motion ? clamp(y / metrics.heroTravel) : 0;
     workBlend = smooth((y - metrics.workTop + height) / (height * .92));
     departure = smooth((y - metrics.aboutTop + height * .75) / height);
@@ -496,7 +532,6 @@
     // The camera follows the tree into its reserved gallery space.
     const push = motion && !mobile ? Math.sin(travel * Math.PI) * .32 * (1 - workBlend) : 0;
     const baseSize = mobile ? Math.min(metrics.treeWidth * .32, metrics.treeHeight / 3.8) : Math.min(width * .2, height * .225);
-    galleryTreeRect = workTree.getBoundingClientRect();
     const workSize = metrics.workTreeSize;
     const cinematic = document.documentElement.classList.contains('cinematic-work');
     // Scroll position through the five project chapters, measured in projects
@@ -626,9 +661,9 @@
 
   function drawConnections() {
     const context = connectionContext;
-    if (!context) return;
+    if (!context) return false;
     context.clearRect(0, 0, width, height);
-    if (workBlend < .02 || departure > .98) return;
+    if (workBlend < .02 || departure > .98) return false;
     context.lineCap = 'round';
     context.lineJoin = 'round';
     // Selecting a project illuminates its own root-to-branch path.
@@ -672,14 +707,19 @@
     }
     context.shadowBlur = 0;
     context.globalAlpha = 1;
+    return true;
   }
 
   function draw() {
     if (!context || !camera) return;
     context.clearRect(0, 0, width, height);
-    const glow = context.createRadialGradient(camera.x, camera.y - camera.scale * .25, 0, camera.x, camera.y, camera.scale * 1.8);
+    const glowRadius = camera.scale * 1.8;
+    const glow = context.createRadialGradient(camera.x, camera.y - camera.scale * .25, 0, camera.x, camera.y, glowRadius);
     glow.addColorStop(0, '#275d5922'); glow.addColorStop(.5, '#12384312'); glow.addColorStop(1, '#080b1000');
-    context.fillStyle = glow; context.fillRect(0, 0, width, height);
+    // The outermost stop is transparent, so only the gradient's own box needs
+    // painting; a full-viewport fill was wasted work on every scroll frame.
+    context.fillStyle = glow;
+    context.fillRect(camera.x - glowRadius, camera.y - glowRadius, glowRadius * 2, glowRadius * 2);
 
     // Ground ellipse and its far rim anchor the roots in space.
     context.globalAlpha = .24 * camera.alpha;
@@ -691,64 +731,88 @@
     trace(ground); context.stroke();
     context.globalAlpha = .12 * camera.alpha;
     context.strokeStyle = '#927963';
-    [trunk, ...limbs, ...roots, ...rootlets].forEach(path => { trace(projectedPath(path, 28)); context.stroke(); });
+    // The faint wood wireframe is a desktop flourish. On a phone the particle
+    // wood already carries the silhouette, so only the trunk, main limbs and
+    // roots are stroked instead of every twig and rootlet.
+    if (mobile) {
+      for (let index = 0; index < mobileSkeleton.length; index++) { trace(projectedPath(mobileSkeleton[index], 18)); context.stroke(); }
+    } else {
+      [trunk, ...limbs, ...roots, ...rootlets].forEach(path => { trace(projectedPath(path, 28)); context.stroke(); });
+    }
 
-    const visible = [];
+    let visibleCount = 0;
+    depthCounts.fill(0);
     for (let index = 0; index < particles.length; index++) {
       const particle = particles[index];
       // Preserve the canopy on phones while keeping the wood particle budget low.
       if (mobile && index % (particle.kind === 4 ? 2 : 3)) continue;
-      const sway = motion ? Math.sin(elapsed * .65 + particle.position[1] * 2 + particle.phase * .1) * .012 * Math.max(0, -particle.position[1]) : 0;
-      const projected = project(particle.position, sway);
+      const position = particle.position;
+      const sway = motion ? Math.sin(elapsed * .65 + position[1] * 2 + particle.phase * .1) * .012 * Math.max(0, -position[1]) : 0;
+      const projected = projectInto(position[0], position[1], position[2], sway, pointScratch);
       if (projected.x < -5 || projected.x > width + 5 || projected.y < -5 || projected.y > height + 5) continue;
-      visible.push({ ...projected, particle, sway });
+      let entry = visiblePool[visibleCount];
+      if (!entry) entry = visiblePool[visibleCount] = { x: 0, y: 0, depth: 0, perspective: 0, particle: null, sway: 0, bucket: 0 };
+      entry.x = projected.x; entry.y = projected.y;
+      entry.depth = projected.depth; entry.perspective = projected.perspective;
+      entry.particle = particle; entry.sway = sway;
+      entry.bucket = clamp((projected.depth + 6) * (depthBuckets / 12) | 0, 0, depthBuckets - 1);
+      depthCounts[entry.bucket + 1]++;
+      visiblePool[visibleCount++] = entry;
     }
     // Far particles draw first; depth controls brightness, tint and point size.
-    visible.sort((a, b) => a.depth - b.depth);
+    for (let bucket = 1; bucket <= depthBuckets; bucket++) depthCounts[bucket] += depthCounts[bucket - 1];
+    for (let index = 0; index < visibleCount; index++) {
+      const entry = visiblePool[index];
+      ordered[depthCounts[entry.bucket]++] = entry;
+    }
     // Petioles: one batched pass of short stems attaches every leaf to its
     // twig, so the canopy reads as growing branches, not floating confetti.
     context.globalAlpha = .32 * camera.alpha;
     context.strokeStyle = '#55785f';
     context.lineWidth = .6;
     context.beginPath();
-    for (const point of visible) {
+    for (let index = 0; index < visibleCount; index++) {
+      const point = ordered[index];
       const stem = point.particle;
       if (stem.kind !== 4 || !stem.anchor) continue;
-      const base = project(stem.anchor, point.sway);
+      const base = projectInto(stem.anchor[0], stem.anchor[1], stem.anchor[2], point.sway, pointScratch);
       context.moveTo(base.x, base.y);
       context.lineTo(point.x, point.y);
     }
     context.stroke();
-    for (const point of visible) {
+    for (let index = 0; index < visibleCount; index++) {
+      const point = ordered[index];
       const particle = point.particle;
       const depthLight = clamp((point.depth + 1.2) / 2.4);
       const flicker = motion ? .85 + .15 * Math.sin(elapsed * 1.3 + particle.phase) : 1;
       context.globalAlpha = (.18 + depthLight * .72) * particle.light * flicker * camera.alpha;
       if (particle.kind === 4) {
         const flutter = motion ? Math.sin(elapsed * 1.1 + particle.phase) * .22 : 0;
-        const leafPoint = (tip, edge) => project(particle.position.map((value, axis) =>
-          value + particle.tip[axis] * tip + particle.edge[axis] * edge
-        ), point.sway);
-        const start = leafPoint(-1, 0);
-        const end = leafPoint(1, 0);
-        const left = leafPoint(flutter, 1);
-        const right = leafPoint(-flutter, -1);
+        const body = particle.position, tip = particle.tip, edge = particle.edge;
+        // Each blade corner is projected straight from scalars, so a canopy of
+        // thousands of leaves no longer allocates four arrays per leaf.
+        projectInto(body[0] - tip[0], body[1] - tip[1], body[2] - tip[2], point.sway, leafStart);
+        projectInto(body[0] + tip[0], body[1] + tip[1], body[2] + tip[2], point.sway, leafEnd);
+        projectInto(body[0] + tip[0] * flutter + edge[0], body[1] + tip[1] * flutter + edge[1],
+          body[2] + tip[2] * flutter + edge[2], point.sway, leafLeft);
+        projectInto(body[0] - tip[0] * flutter - edge[0], body[1] - tip[1] * flutter - edge[1],
+          body[2] - tip[2] * flutter - edge[2], point.sway, leafRight);
         // Sun-kissed top leaves run yellow-green; shaded depth stays deep teal.
         context.fillStyle = particle.sun > .82 && depthLight > .45 ? '#c9eaa6'
           : particle.sun > .6 && depthLight > .45 ? '#a9dfa4'
           : depthLight > .65 ? '#b8f2bc' : depthLight > .4 ? '#72cda2' : '#398f83';
         context.beginPath();
-        context.moveTo(start.x, start.y);
-        context.quadraticCurveTo(left.x, left.y, end.x, end.y);
-        context.quadraticCurveTo(right.x, right.y, start.x, start.y);
+        context.moveTo(leafStart.x, leafStart.y);
+        context.quadraticCurveTo(leafLeft.x, leafLeft.y, leafEnd.x, leafEnd.y);
+        context.quadraticCurveTo(leafRight.x, leafRight.y, leafStart.x, leafStart.y);
         context.fill();
         if (particle.light > .88) {
           context.globalAlpha *= .45;
           context.strokeStyle = '#d4ffdb';
           context.lineWidth = .45;
           context.beginPath();
-          context.moveTo(start.x, start.y);
-          context.lineTo(end.x, end.y);
+          context.moveTo(leafStart.x, leafStart.y);
+          context.lineTo(leafEnd.x, leafEnd.y);
           context.stroke();
         }
         continue;
@@ -762,37 +826,41 @@
       }
     }
     context.fillStyle = '#9bd6d2';
-    air.forEach(particle => {
-      const position = [...particle.position];
-      if (motion) position[1] += Math.sin(elapsed * .12 + particle.phase) * .12;
-      const point = project(position);
+    for (const particle of air) {
+      const position = particle.position;
+      const drift = motion ? Math.sin(elapsed * .12 + particle.phase) * .12 : 0;
+      const point = projectInto(position[0], position[1] + drift, position[2], 0, pointScratch);
       context.globalAlpha = .1 + .15 * (motion ? (1 + Math.sin(elapsed * .4 + particle.phase)) / 2 : .5);
       context.beginPath(); context.arc(point.x, point.y, particle.size * point.perspective, 0, Math.PI * 2); context.fill();
-    });
+    }
     // Depth of field: soft motes in front of the lens parallax against the
     // tree, so the silhouette sits between two layers instead of on a backdrop.
     for (const mote of bokeh) {
-      const position = [...mote.position];
-      if (motion) {
-        position[0] += Math.sin(elapsed * .15 + mote.phase) * .18;
-        position[1] += Math.cos(elapsed * .12 + mote.phase * 1.3) * .13;
-      }
-      const point = project(position);
+      const position = mote.position;
+      const driftX = motion ? Math.sin(elapsed * .15 + mote.phase) * .18 : 0;
+      const driftY = motion ? Math.cos(elapsed * .12 + mote.phase * 1.3) * .13 : 0;
+      const point = projectInto(position[0] + driftX, position[1] + driftY, position[2], 0, pointScratch);
       const size = mote.size * point.perspective * (mobile ? .74 : 1);
       if (point.x < -size || point.x > width + size || point.y < -size || point.y > height + size) continue;
       context.globalAlpha = mote.alpha * camera.alpha * (motion ? .55 + .45 * Math.sin(elapsed * .45 + mote.phase) : .8);
       context.drawImage(lensSprites[mote.tint], point.x - size / 2, point.y - size / 2, size, size);
     }
     context.globalAlpha = 1;
-    drawConnections();
+    const connectionsDrawn = drawConnections();
     // Reuse the rendered particles in the pinned gallery viewport. This keeps
     // the tree above scrolling posters without drawing the particle system twice.
     if (workTreeContext && galleryTreeRect) {
       workTreeContext.clearRect(0, 0, workTree.clientWidth, workTree.clientHeight);
       if (galleryAlpha > 0) {
         workTreeContext.globalAlpha = galleryAlpha;
-        for (const source of [canvas, connectionCanvas]) {
-          workTreeContext.drawImage(source,
+        workTreeContext.drawImage(canvas,
+          galleryTreeRect.left * canvasRatio, galleryTreeRect.top * canvasRatio,
+          galleryTreeRect.width * canvasRatio, galleryTreeRect.height * canvasRatio,
+          0, 0, galleryTreeRect.width, galleryTreeRect.height);
+        // The separate connection overlay is empty most of the frame, so it is
+        // only composited when it actually drew something.
+        if (connectionsDrawn) {
+          workTreeContext.drawImage(connectionCanvas,
             galleryTreeRect.left * canvasRatio, galleryTreeRect.top * canvasRatio,
             galleryTreeRect.width * canvasRatio, galleryTreeRect.height * canvasRatio,
             0, 0, galleryTreeRect.width, galleryTreeRect.height);

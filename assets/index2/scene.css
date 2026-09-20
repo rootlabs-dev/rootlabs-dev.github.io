@@ -71,8 +71,10 @@ html:not(.motion-enabled) .hero{position:relative}
   .header {
     height: calc(72px + env(safe-area-inset-top));
     padding-top: env(safe-area-inset-top);
+    /* The bar is already 93% opaque, so the backdrop blur was invisible while
+       forcing the compositor to re-blur the moving tree on every phone frame. */
     background: #080b10ed;
-    backdrop-filter: blur(12px);
+    backdrop-filter: none;
   }
   .brand { min-height: 44px; }
   .brand img { width: 38px; height: 38px; }
