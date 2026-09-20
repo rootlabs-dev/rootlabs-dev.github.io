@@ -252,30 +252,50 @@
     [-1.02, -.66, .08], [.98, -.52, .13], [-.78, -1.08, -.25],
     [.74, -1.05, -.22], [.16, -1.35, .18]
   ];
-  // Where in the tree's growth each particle arrives. Roots first, then the trunk
-  // climbs, the limbs reach out, the twigs follow and the canopy unfurls last.
-  // Leaves hang off their own limb's stage, so a canopy fills after its own wood.
+  // Where in the tree's growth each particle arrives, strictly in order: roots,
+  // then the trunk, then the limbs, the twigs and finally the leaves — so no
+  // branch and no leaf is on screen before the wood that carries it. `settle` is
+  // how far past a stage's start its particles take to travel out of the seed,
+  // and every one of them finishes settling before growth reaches 1.
   const growthStages = {
-    0: { base: .30, span: .40 },  // trunk, the shoot rising out of the seed
-    1: { base: .55, span: .30, leaf: { base: .72, span: .28 } },  // limbs + their leaves
-    2: { base: .68, span: .26, leaf: { base: .82, span: .18 } },  // twigs + their leaves
-    3: { base: .00, span: .34 },  // roots, the first thing the seed puts out
-    4: { base: .72, span: .28 }   // fallback for leaves without a limb stage
+    0: { base: .45, span: .21, settle: .23 },  // trunk, a bare shoot
+    1: { base: .68, span: .12, settle: .22 },  // limbs (each carries its own sprout time)
+    2: { base: .80, span: .09, settle: .10 },  // twigs (likewise)
+    3: { base: .00, span: .34, settle: .42 },  // roots, the first thing the seed puts out
+    4: { base: .9 }                            // leaf fallback for a path with no limb stage
   };
-  // How much growth a particle takes to reach full presence, and how much of the
-  // scroll a wood particle takes to travel from the seed out to its place.
-  const growthFade = .1;
-  const growthTravel = .3;
+  // How much growth a particle takes to reach full presence. Kept short enough
+  // that every leaf is fully open by the time growth reaches 1, otherwise the
+  // last of the canopy would stay permanently half transparent.
+  const growthFade = .05;
+  // Growth at which the whole woody structure is complete and the canopy starts,
+  // which is also where the work section begins.
+  const woodGrowth = .9;
   // Growth at the very top of the page, where the tree is still just a seed, and
   // the cluster in the soil that every wood particle unfurls from.
   const seedGrowth = .1;
   const seedCentre = [0, .95, 0];
   const seedRadius = .2;
+  // One limb at a time. Each limb is given its own sprout time where it is built,
+  // so the tree gains whole branches as the projects advance instead of every
+  // branch growing at once; the trunk and roots keep their stage windows.
+  const limbWoodSpan = .03;  // how long a single limb takes to extend
+  const limbSettle = .03;    // how long it takes to travel out of its parent
+  const leafSpan = .02;      // spread of the leaves along their own limb
+  let crownIndex = 0;
+  let forkIndex = 0;
   function populate(path, count, radius, kind) {
     const stage = growthStages[kind] || growthStages[1];
-    // Leaves read the stage of the limb they belong to, so the canopy fills in
-    // after its own wood instead of all at once.
-    path.growStage = stage;
+    const sprouted = path.sproutAt !== undefined;
+    const base = sprouted ? path.sproutAt : stage.base;
+    const span = sprouted ? limbWoodSpan : stage.span;
+    // Leaves read their own limb's place in the order, which each limb sets where
+    // it is built, so a canopy fills in after the wood that carries it.
+    if (path.leafBase === undefined) path.leafBase = growthStages[4].base;
+    // Wood travels out of its parent — the seed for the trunk and roots, the
+    // attachment point for a limb — so a branch grows out of the wood that holds
+    // it rather than flying in from the ground.
+    const origin = sprouted ? path[0] : seedCentre;
     for (let i = 0; i < count; i++) {
       const t = random();
       const center = curve(path, t);
@@ -292,15 +312,17 @@
       const r = radius * (1 - t * .75) * (.45 + random() * .55);
       const position = center.map((value, axis) => value + r * (Math.cos(angle) * normal[axis] + Math.sin(angle) * binormal[axis]));
       const phase = random() * Math.PI * 2;
-      // The particle's own phase also scatters it inside the seed, so the whole
-      // tree starts as one dense cluster without disturbing the seeded shape.
+      // The particle's own phase also scatters it inside the cluster, so the
+      // trunk starts as one dense seed without disturbing the seeded shape.
       const scatter = seedRadius * (.35 + .65 * phase / (Math.PI * 2));
       particles.push({
         position, phase, size: .45 + random() * .95, light: .4 + random() * .6, kind,
-        grow: stage.base + t * stage.span,
-        seedX: seedCentre[0] + Math.cos(phase) * scatter,
-        seedY: seedCentre[1] + Math.sin(phase * 1.7) * scatter * .6,
-        seedZ: seedCentre[2] + Math.sin(phase) * scatter
+        grow: base + t * span,
+        travFrom: base,
+        travSpan: sprouted ? limbSettle : (stage.settle || stage.span),
+        seedX: origin[0] + Math.cos(phase) * scatter,
+        seedY: origin[1] + Math.sin(phase * 1.7) * scatter * .6,
+        seedZ: origin[2] + Math.sin(phase) * scatter
       });
     }
   }
@@ -308,6 +330,8 @@
   branchTips.forEach((tip, index) => {
     const start = curve(trunk, .4 + index * .09);
     const path = [start, [start[0] + tip[0] * .15, start[1] - .2, tip[2] * .3], [tip[0] * .7, tip[1] + .02, tip[2] + .2], tip];
+    path.sproutAt = .7 + index * .012;
+    path.leafBase = .845;
     primaryLimbs.push(path);
     limbs.push(path);
     populate(path, 540, .058, 1);
@@ -316,6 +340,8 @@
       const theta = twig * 2.4 + index * 1.7;
       const end = [origin[0] + Math.cos(theta) * (.22 + twig * .026), origin[1] - .24 - random() * .21, origin[2] + Math.sin(theta) * .4];
       const twigPath = [origin, [origin[0], origin[1] - .13, origin[2]], [end[0], end[1] + .12, end[2]], end];
+      twigPath.sproutAt = .86 + index * .012 + twig * .0016;
+      twigPath.leafBase = .855 + (index * 5 + twig) / 25 * .02;
       limbs.push(twigPath);
       populate(twigPath, 100, .024, 2);
     }
@@ -386,6 +412,8 @@
     { count: 10, radius: 1.02, y: -.94, attachment: .59 },
     { count: 7, radius: .64, y: -1.34, attachment: .76 }
   ];
+  const crownLimbCount = crownLayers.reduce((total, layer) => total + layer.count, 0);
+  const crownForkCount = crownLimbCount * 3;
   crownLayers.forEach((layer, level) => {
     for (let index = 0; index < layer.count; index++) {
       const angle = index / layer.count * Math.PI * 2 + level * 1.17;
@@ -394,6 +422,10 @@
       const end = [Math.cos(angle) * reach, layer.y + (random() - .5) * .1, Math.sin(angle) * reach];
       const path = [origin, [origin[0] + end[0] * .18, origin[1] - .18, origin[2] + end[2] * .18],
         [end[0] * .75, end[1] + .06, end[2] * .75], end];
+      path.sproutAt = .9 + crownIndex / crownLimbCount * .03;
+      // The crown carries most of the leaves, so its share of the schedule is
+      // spread across the projects rather than landing all at once.
+      path.leafBase = .875 + crownIndex++ / crownLimbCount * .055;
       limbs.push(path);
       populate(path, 95, .032 - level * .005, 1);
       for (let fork = 0; fork < 3; fork++) {
@@ -405,6 +437,8 @@
           start[2] + Math.sin(turn) * spread];
         const twigPath = [start, vecMix(start, curve(path, t + .1), .8),
           [tip[0], tip[1] + .07, tip[2]], tip];
+        twigPath.sproutAt = .93 + forkIndex / crownForkCount * .03;
+        twigPath.leafBase = .9 + forkIndex++ / crownForkCount * .03;
         limbs.push(twigPath);
         populate(twigPath, 32, .014, 2);
       }
@@ -420,7 +454,7 @@
     for (let index = 0; index < leafCount; index++) {
       const along = .72 + random() * .28;
       const center = curve(path, along);
-      const leafStage = (path.growStage && path.growStage.leaf) || growthStages[4];
+      const leafBase = path.leafBase !== undefined ? path.leafBase : growthStages[4].base;
       const azimuth = random() * Math.PI * 2;
       const elevation = random() * 2 - 1;
       const spread = Math.cbrt(random());
@@ -441,7 +475,7 @@
         position, anchor: center, sun: clamp((.1 - position[1]) / 1.5),
         phase: random() * Math.PI * 2, size: 1,
         light: .55 + random() * .45, kind: 4,
-        grow: leafStage.base + (along - .72) / .28 * leafStage.span,
+        grow: leafBase + (along - .72) / .28 * leafSpan,
         tip: axis.map(value => value * length),
         edge: across.map(value => value * length * .55)
       });
@@ -554,11 +588,16 @@
     // closed out before the about copy lands; starting it at aboutTop itself
     // left a stretch where the frame had left but the tree had not come back.
     departure = smooth((y - (metrics.aboutTop - height * 1.05)) / (height * .75));
-    // One scroll, one growth: a seed in the soil, then roots, then a sapling,
-    // branches and finally the full canopy as the five projects begin. Every
-    // wood particle travels out of the seed, so nothing is ever half-built in
-    // place. Driven from the document anchors, so it is layout independent.
-    growth = motion ? mix(seedGrowth, 1, smooth(y / Math.max(1, metrics.workTop))) : 1;
+    // Growth runs in two movements: from the seed to a bare but fully branched
+    // tree by the time the work section starts, then the canopy fills out across
+    // the five projects, so the tree is leafiest after the fifth. Every wood
+    // particle travels out of the seed, so nothing is ever half-built in place,
+    // and both anchors are measured from the document, so it is layout agnostic.
+    growth = motion
+      ? (y <= metrics.workTop
+        ? mix(seedGrowth, woodGrowth, smooth(y / Math.max(1, metrics.workTop)))
+        : mix(woodGrowth, 1, clamp((y - metrics.workTop) / Math.max(1, metrics.workTravel))))
+      : 1;
     // "Good software starts below the surface": while the tree is putting out its
     // roots the ground line is brought up to carry the frame.
     below = motion ? smooth(clamp(1 - Math.abs(growth - .3) / .2)) : 0;
@@ -748,6 +787,10 @@
     if (!context) return false;
     context.clearRect(0, 0, width, height);
     if (workBlend < .02 || departure > .98) return false;
+    // The highlighted root-to-branch path belongs to the finished tree, so it
+    // waits for the canopy instead of tracing branches that are not there yet.
+    const ready = clamp((growth - woodGrowth) / .06);
+    if (ready <= 0) return false;
     context.lineCap = 'round';
     context.lineJoin = 'round';
     // Selecting a project illuminates its own root-to-branch path.
@@ -761,7 +804,7 @@
       : whole.slice(0, Math.max(2, Math.round(whole.length * branchGrow)));
     // A steady stroke makes the selected branch clear, even with motion off;
     // the travelling pulse is an accent, never the only visible connection.
-    const opacity = workBlend * (1 - departure) * .9;
+    const opacity = workBlend * (1 - departure) * .9 * ready;
     trace(points, context);
     // A narrow dark edge separates the path from the leaves.
     context.globalAlpha = opacity * .65;
@@ -835,9 +878,9 @@
     // wood already carries the silhouette, so only the trunk, main limbs and
     // roots are stroked instead of every twig and rootlet. It fades in with the
     // wood, so no wireframe shows through while the tree is still a seed.
-    context.globalAlpha = .12 * camera.alpha * clamp((growth - .2) / .35);
+    context.globalAlpha = .12 * camera.alpha * clamp((growth - .45) / .25);
     context.strokeStyle = '#927963';
-    if (growth > .2) {
+    if (growth > .45) {
       if (mobile) {
         for (let index = 0; index < mobileSkeleton.length; index++) { trace(projectedPath(mobileSkeleton[index], 18)); context.stroke(); }
       } else {
@@ -856,12 +899,12 @@
       const appear = clamp((growth - particle.grow) / growthFade);
       if (appear <= 0) continue;
       const position = particle.position;
-      // Wood unfurls out of the seed: at the moment it arrives a particle is
-      // still inside the cluster, and it settles into place further up the
-      // scroll. Skipped entirely once the tree is grown, which is most of the page.
+      // Wood unfurls out of the seed over its own stage's window, so each part
+      // travels out together and every one of them is settled well before the
+      // tree is complete. Skipped once the last stage has finished travelling.
       let px = position[0], py = position[1], pz = position[2];
       if (particle.kind < 4 && growth < 1) {
-        const back = 1 - clamp((growth - particle.grow) / growthTravel);
+        const back = 1 - clamp((growth - particle.travFrom) / particle.travSpan);
         px += (particle.seedX - px) * back;
         py += (particle.seedY - py) * back;
         pz += (particle.seedZ - pz) * back;
