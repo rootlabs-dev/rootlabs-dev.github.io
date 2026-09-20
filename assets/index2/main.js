@@ -548,9 +548,11 @@
       const entry = clamp((fraction - .55) / .2);
       // Position follows one clock so both chapters travel together, while two
       // offset opacity curves make the outgoing clear before the incoming lands.
-      const move = smooth(entry);
+      // The last chapter has nothing to hand off to, so it stays put rather than
+      // fading out and leaving the frame empty before the section releases.
+      const move = finalChapter ? 0 : smooth(entry);
       const incoming = finalChapter ? 0 : smooth(clamp((entry - .12) / .88));
-      const outgoing = 1 - smooth(clamp(entry / .5));
+      const outgoing = finalChapter ? 1 : 1 - smooth(clamp(entry / .5));
       const current = incoming > 0 ? chapter + 1 : outgoing > 0 ? chapter : activeProject;
       projectPanels.forEach((panel, index) => {
         const leaving = index === chapter;
