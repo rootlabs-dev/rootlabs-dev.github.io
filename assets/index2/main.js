@@ -273,9 +273,9 @@
   const woodGrowth = .9;
   // Growth at the very top of the page, where the tree is still just a seed, and
   // the cluster in the soil that every wood particle unfurls from.
-  const seedGrowth = .1;
+  const seedGrowth = .12;
   const seedCentre = [0, .95, 0];
-  const seedRadius = .2;
+  const seedRadius = .18;
   // One limb at a time. Each limb is given its own sprout time where it is built,
   // so the tree gains whole branches as the projects advance instead of every
   // branch growing at once; the trunk and roots keep their stage windows.
@@ -312,17 +312,28 @@
       const r = radius * (1 - t * .75) * (.45 + random() * .55);
       const position = center.map((value, axis) => value + r * (Math.cos(angle) * normal[axis] + Math.sin(angle) * binormal[axis]));
       const phase = random() * Math.PI * 2;
-      // The particle's own phase also scatters it inside the cluster, so the
-      // trunk starts as one dense seed without disturbing the seeded shape.
-      const scatter = seedRadius * (.35 + .65 * phase / (Math.PI * 2));
+      // The cluster the tree collapses into is shaped like a seed rather than a
+      // loose puff: a compact ovoid, taller than it is wide, with the grains
+      // gathered toward its skin and narrowed where the shoot will come out. The
+      // shape is derived from the particle's own phase, so the seeded tree is
+      // left exactly as it was.
+      const h1 = Math.sin(phase * 12.9898) * 43758.5453;
+      const h2 = Math.sin(phase * 78.233) * 12345.6789;
+      const polar = (h1 - Math.floor(h1)) * 2 - 1;
+      const ring = Math.sqrt(1 - polar * polar);
+      const shell = (.58 + .42 * Math.cbrt(h2 - Math.floor(h2))) * seedRadius;
+      const taper = (1 - .3 * Math.max(0, polar)) * .8;
+      const scatterX = Math.cos(phase) * ring * taper * shell;
+      const scatterY = polar * shell * 1.15;
+      const scatterZ = Math.sin(phase) * ring * taper * shell;
       particles.push({
         position, phase, size: .45 + random() * .95, light: .4 + random() * .6, kind,
         grow: base + t * span,
         travFrom: base,
         travSpan: sprouted ? limbSettle : (stage.settle || stage.span),
-        seedX: origin[0] + Math.cos(phase) * scatter,
-        seedY: origin[1] + Math.sin(phase * 1.7) * scatter * .6,
-        seedZ: origin[2] + Math.sin(phase) * scatter
+        seedX: origin[0] + scatterX,
+        seedY: origin[1] + scatterY,
+        seedZ: origin[2] + scatterZ
       });
     }
   }
